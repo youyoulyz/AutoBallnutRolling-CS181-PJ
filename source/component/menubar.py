@@ -277,22 +277,28 @@ class Panel():
                 y += c.PANEL_Y_INTERNAL
             x += c.PANEL_X_INTERNAL
             plant_name = c.PLANT_CARD_INFO[index][c.PLANT_NAME_INDEX]
-            if (plant_name in c.WATER_PLANTS
-            and self.background_type not in c.POOL_EQUIPPED_BACKGROUNDS):
-                not_recommend = c.REASON_OTHER
-            elif (plant_name == c.GRAVEBUSTER
-            and self.background_type != c.BACKGROUND_NIGHT):
-                not_recommend = c.REASON_OTHER
-            elif (plant_name in c.CAN_SLEEP_PLANTS
-            and self.background_type in c.DAYTIME_BACKGROUNDS):
-                not_recommend = c.REASON_WILL_SLEEP
-            elif (plant_name == c.COFFEEBEAN
-            and self.background_type not in c.DAYTIME_BACKGROUNDS):
-                not_recommend = c.REASON_OTHER
-            # 还有屋顶场景，以及其他植物没有实现的植物没有写进来
-            else:
-                not_recommend = 0
-            self.card_list.append(Card(x, y, index, 0.5, not_recommend))
+            if plant_name in [c.PEASHOOTER,c.SUNFLOWER]:
+                self.card_list.append(Card(x,y,index,0.5,0))
+            # if (plant_name in c.WATER_PLANTS
+            # and self.background_type not in c.POOL_EQUIPPED_BACKGROUNDS):
+            #     not_recommend = c.REASON_OTHER
+            # elif (plant_name == c.GRAVEBUSTER
+            # and self.background_type != c.BACKGROUND_NIGHT):
+            #     not_recommend = c.REASON_OTHER
+            # elif (plant_name in c.CAN_SLEEP_PLANTS
+            # and self.background_type in c.DAYTIME_BACKGROUNDS):
+            #     not_recommend = c.REASON_WILL_SLEEP
+            # elif (plant_name == c.COFFEEBEAN
+            # and self.background_type not in c.DAYTIME_BACKGROUNDS):
+            #     not_recommend = c.REASON_OTHER
+            # # 还有屋顶场景，以及其他植物没有实现的植物没有写进来
+            # else:
+            #     not_recommend = 0
+            #self.card_list.append(Card(x, y, index, 0.5, not_recommend))
+        # ! EDIT 
+        # add default cards here
+        for card in self.card_list:
+            self.addCard(card)
 
     def checkCardClick(self, mouse_pos):
         delete_card = None
@@ -320,18 +326,20 @@ class Panel():
             return
 
         for card in self.card_list:
-            if card.checkMouseClick(mouse_pos):
-                if card.canSelect():
-                    self.addCard(card)
-                    # 播放点击音效
-                    c.SOUND_TAPPING_CARD.play()
-                    if card.info[c.PLANT_NAME_INDEX] == c.COFFEEBEAN:
-                        for i in self.card_list:
-                            if i.not_recommend == c.REASON_WILL_SLEEP:
-                                i.not_recommend = c.REASON_SLEEP_BUT_COFFEE_BEAN
-                                i.image = i.orig_image
-                                i.image.set_alpha(255)
-                break
+            #! EDIT HERE
+            self.addCard(card)
+            # if card.checkMouseClick(mouse_pos):
+            #     if card.canSelect():
+            #         self.addCard(card)
+            #         # 播放点击音效
+            #         c.SOUND_TAPPING_CARD.play()
+            #         if card.info[c.PLANT_NAME_INDEX] == c.COFFEEBEAN:
+            #             for i in self.card_list:
+            #                 if i.not_recommend == c.REASON_WILL_SLEEP:
+            #                     i.not_recommend = c.REASON_SLEEP_BUT_COFFEE_BEAN
+            #                     i.image = i.orig_image
+            #                     i.image.set_alpha(255)
+            #     break
 
     def addCard(self, card:Card):
         card.setSelect(False)

@@ -399,6 +399,7 @@ class Level(tool.State):
 
         elif mouse_pos and mouse_click[0]:
             self.panel.checkCardClick(mouse_pos)
+            # TODO
             if self.panel.checkStartButtonClick(mouse_pos):
                 self.initPlay(self.panel.getSelectedCards())
             elif self.inArea(self.little_menu_rect, *mouse_pos):
