@@ -344,8 +344,10 @@ class Panel():
         self.card_list[index].setSelect(True)
 
     def checkStartButtonClick(self, mouse_pos):
+        # ! CHANGED HERE
         if self.selected_num < c.CARD_LIST_NUM:
-            return False
+            #return False
+            pass
 
         x, y = mouse_pos
         if (self.button_rect.x <= x <= self.button_rect.right and
