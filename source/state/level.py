@@ -397,10 +397,12 @@ class Level(tool.State):
             self.pauseAndCheckMenuOptions(mouse_pos, mouse_click)
             return
 
-        elif mouse_pos and mouse_click[0]:
-            self.panel.checkCardClick(mouse_pos)
-            # TODO
-            if self.panel.checkStartButtonClick(mouse_pos):
+        #elif mouse_pos and mouse_click[0]:
+        elif True:
+            #self.panel.checkCardClick(mouse_pos)
+            # EDITED
+            #if self.panel.checkStartButtonClick(mouse_pos):
+            if True:
                 self.initPlay(self.panel.getSelectedCards())
             elif self.inArea(self.little_menu_rect, *mouse_pos):
                 self.show_game_menu = True

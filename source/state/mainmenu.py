@@ -25,7 +25,7 @@ class Menu(tool.State):
             i.set_volume(self.game_info[c.SOUND_VOLUME])
         # ! CHANGED HERE
         #self.adventure_clicked=True
-        self.respondAdventureClick()
+        #self.respondAdventureClick()
 
     def setupBackground(self):
         frame_rect = (80, 0, 800, 600)

@@ -277,7 +277,7 @@ class Panel():
                 y += c.PANEL_Y_INTERNAL
             x += c.PANEL_X_INTERNAL
             plant_name = c.PLANT_CARD_INFO[index][c.PLANT_NAME_INDEX]
-            if plant_name in [c.PEASHOOTER,c.SUNFLOWER]:
+            if plant_name in [c.PEASHOOTER,c.SUNFLOWER,c.WALLNUT]:
                 self.card_list.append(Card(x,y,index,0.5,0))
             # if (plant_name in c.WATER_PLANTS
             # and self.background_type not in c.POOL_EQUIPPED_BACKGROUNDS):
