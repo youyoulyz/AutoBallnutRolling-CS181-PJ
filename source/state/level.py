@@ -1520,11 +1520,13 @@ class Level(tool.State):
                 if self.game_info[c.LEVEL_NUM] >= map.TOTAL_LEVEL:
                     self.game_info[c.LEVEL_COMPLETIONS] += 1
                     self.game_info[c.LEVEL_NUM] = 1
-                    self.next = c.AWARD_SCREEN
+                    #self.next = c.AWARD_SCREEN
+                    self.next=c.LEVEL
                     # 播放大胜利音效
                     c.SOUND_FINAL_FANFARE.play()
                 else:
-                    self.next = c.GAME_VICTORY
+                    #self.next = c.GAME_VICTORY
+                    self.next=c.LEVEL
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             elif self.game_info[c.GAME_MODE] == c.MODE_LITTLEGAME:
@@ -1537,7 +1539,8 @@ class Level(tool.State):
                     # 播放大胜利音效
                     c.SOUND_FINAL_FANFARE.play()
                 else:
-                    self.next = c.GAME_VICTORY
+                    #self.next = c.GAME_VICTORY
+                    self.next=c.LEVEL
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             self.done = True
@@ -1546,7 +1549,8 @@ class Level(tool.State):
             # 播放失败音效
             c.SOUND_LOSE.play()
             c.SOUND_SCREAM.play()
-            self.next = c.GAME_LOSE
+            #self.next = c.GAME_LOSE
+            self.next=c.LEVEL
             self.done = True
 
     def drawMouseShow(self, surface):
