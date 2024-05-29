@@ -1528,7 +1528,8 @@ class Level(tool.State):
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             elif self.game_info[c.GAME_MODE] == c.MODE_LITTLEGAME:
-                self.game_info[c.LITTLEGAME_NUM] += 1
+                # changed here
+                #self.game_info[c.LITTLEGAME_NUM] += 1
                 if self.game_info[c.LITTLEGAME_NUM] >= map.TOTAL_LITTLE_GAME:
                     self.game_info[c.LITTLEGAME_COMPLETIONS] += 1
                     self.game_info[c.LITTLEGAME_NUM] = 1

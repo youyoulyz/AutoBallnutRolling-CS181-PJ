@@ -26,6 +26,7 @@ class Menu(tool.State):
         # ! CHANGED HERE
         #self.adventure_clicked=True
         #self.respondAdventureClick()
+        self.respondLittleGameClick()
 
     def setupBackground(self):
         frame_rect = (80, 0, 800, 600)
