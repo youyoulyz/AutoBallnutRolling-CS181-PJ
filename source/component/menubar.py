@@ -461,6 +461,10 @@ class MoveBar():
         self.card_pool_weight = tuple(self.card_pool.values())
         self.card_list = []
         self.create_timer = -c.MOVEBAR_CARD_FRESH_TIME
+        
+        #ADD FEATURE: 坚果保龄球和爆炸保龄球计数器
+        self.bowling_num = 0
+        self.redbowling_num = 0
 
     def loadFrame(self, name):
         frame = tool.GFX[name]
@@ -475,6 +479,12 @@ class MoveBar():
         x = self.card_end_x
         y = 6
         selected_card = random.choices(self.card_pool_name, self.card_pool_weight)[0]
+        #判断类型后计数器+1
+        if selected_card == c.WALLNUTBOWLING:
+            self.bowling_num += 1
+        elif selected_card == c.REDWALLNUTBOWLING:
+            self.redbowling_num += 1
+        #end
         self.card_list.append(MoveCard(x, y, selected_card[c.CARD_INDEX], selected_card[c.PLANT_NAME_INDEX]))
         return True
 
@@ -504,7 +514,13 @@ class MoveBar():
             return True
         return False
 
-    def deleateCard(self, card):
+    def deleateCard(self, card:MoveCard):
+        #ADD FEATURE: 删除卡片同时减去数额
+        if card.plant_name == c.WALLNUTBOWLING:
+            self.bowling_num -= 1
+        elif card.plant_name == c.REDWALLNUTBOWLING:
+            self.redbowling_num -= 1
+        #end
         self.card_list.remove(card)
 
     def draw(self, surface):
