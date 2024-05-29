@@ -1,5 +1,6 @@
 import random
 import pygame as pg
+from collections import Counter
 from .. import tool
 from .. import constants as c
 
@@ -486,6 +487,13 @@ class MoveBar():
             self.redbowling_num += 1
         #end
         self.card_list.append(MoveCard(x, y, selected_card[c.CARD_INDEX], selected_card[c.PLANT_NAME_INDEX]))
+        
+        card_name_list=[]
+        for card in self.card_list:
+            
+            card_name_list.append(card.plant_name)
+        print(dict(Counter(card_name_list)))
+
         return True
 
     def update(self, current_time):

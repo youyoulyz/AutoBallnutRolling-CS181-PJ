@@ -413,7 +413,8 @@ LITTLE_GAME_MAP_DATA = (
     c.SHOVEL: 0,
     c.SPAWN_ZOMBIES:c.SPAWN_ZOMBIES_AUTO,
     c.INCLUDED_ZOMBIES: (   c.NORMAL_ZOMBIE, c.CONEHEAD_ZOMBIE,
-                            c.POLE_VAULTING_ZOMBIE, c.BUCKETHEAD_ZOMBIE,),
+                            #c.POLE_VAULTING_ZOMBIE, 
+                            c.BUCKETHEAD_ZOMBIE,),
     c.NUM_FLAGS:2,
     c.CARD_POOL: {  c.WALLNUTBOWLING: 300,
                     c.REDWALLNUTBOWLING: 100,}
