@@ -821,6 +821,8 @@ class Level(tool.State):
         self.checkPlants()
         self.checkCarCollisions()
         self.checkGameState()
+        # do return zombie position
+        self.getZombiesPositions()
 
     def createZombie(self, name, map_y=None):
         # 有指定时按照指定生成，无指定时随机位置生成
@@ -1216,7 +1218,7 @@ class Level(tool.State):
                             else:
                                 zombie.setJump(True, zombie.jump_x)
                         continue
-
+# TODO HERE
                     if target_plant.name == c.WALLNUTBOWLING:
                         if target_plant.canHit(i):
                             # target_plant.vel_y不为0，有纵向速度，表明已经发生过碰撞，对铁门秒杀（这里实现为忽略二类防具攻击）
@@ -1275,6 +1277,24 @@ class Level(tool.State):
 
         else:
             self.new_plant_and_positon = None    # 生效后需要解除刷新设置
+
+    # ADD HERE
+    def getZombiesPositions(self):
+        zombies=[]
+        for i in range(self.map_y_len):
+            for zombie in self.zombie_groups[i]:
+                if zombie.state == c.DIE: 
+                    continue
+                zmb_info=[]
+                # zombie type
+                zmb_info.append(zombie.name)
+                
+                zmb_info.append(zombie.state)
+                zmb_info.append(zombie.health)
+                zmb_info.append(zombie.rect.x)
+                zmb_info.append(i)
+                zombies.append(zmb_info)
+        return zombies
 
     def checkCarCollisions(self):
         for i in range(len(self.cars)):
@@ -1516,6 +1536,7 @@ class Level(tool.State):
         if self.checkVictory():
             if self.game_info[c.GAME_MODE] == c.MODE_ADVENTURE:
                 # ! CHANGED HERE
+                # TODO GET A SCORE OF PLAY
                 #                self.game_info[c.LEVEL_NUM] += 1
                 if self.game_info[c.LEVEL_NUM] >= map.TOTAL_LEVEL:
                     self.game_info[c.LEVEL_COMPLETIONS] += 1

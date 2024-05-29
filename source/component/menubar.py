@@ -488,11 +488,7 @@ class MoveBar():
         #end
         self.card_list.append(MoveCard(x, y, selected_card[c.CARD_INDEX], selected_card[c.PLANT_NAME_INDEX]))
         
-        card_name_list=[]
-        for card in self.card_list:
-            
-            card_name_list.append(card.plant_name)
-        print(dict(Counter(card_name_list)))
+        
 
         return True
 
@@ -507,6 +503,14 @@ class MoveBar():
             if self.createCard():
                 self.create_timer = self.current_time
 
+    # return a dict of cards like  {'RedWallNutBowling': 2, 'WallNutBowling': 2}
+
+    def getCardList(self):
+        card_name_list=[]
+        for card in self.card_list:
+            
+            card_name_list.append(card.plant_name)
+        return dict(Counter(card_name_list))
     def checkCardClick(self, mouse_pos):
         result = None
         for index, card in enumerate(self.card_list):

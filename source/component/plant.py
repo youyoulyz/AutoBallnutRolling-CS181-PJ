@@ -1158,6 +1158,7 @@ class HypnoShroom(Plant):
         if self.health < c.PLANT_HEALTH and self.zombie_to_hypno:
             self.health = 0
 
+# TODO
 
 class WallNutBowling(Plant):
     def __init__(self, x, y, map_y, level):
