@@ -819,6 +819,8 @@ class Level(tool.State):
         self.checkBulletCollisions()
         self.checkZombieCollisions()
         self.checkPlants()
+        # do return plant locations
+        self.getPlantsLocations()
         self.checkCarCollisions()
         self.checkGameState()
         # do return zombie position
@@ -1295,6 +1297,24 @@ class Level(tool.State):
                 zmb_info.append(i)
                 zombies.append(zmb_info)
         return zombies
+    def getPlantsLocations(self):
+        plant_list=[]
+        for i in range(self.map_y_len):
+            for plant in self.plant_groups[i]:
+                if plant.name  in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                    this_plant =[]
+                    this_plant.append(plant.name)
+                    this_plant.append(i)
+                    this_plant.append(plant.getPosition())    
+                    # 横向速度      
+                    if plant.name == c.WALLNUTBOWLING:
+                        this_plant.append(plant.vel_y)
+                    else:
+                        this_plant.append(0)
+                    plant_list.append(this_plant)
+                    #print(this_plant)
+        return plant_list
+
 
     def checkCarCollisions(self):
         for i in range(len(self.cars)):
@@ -1507,6 +1527,8 @@ class Level(tool.State):
             for plant in self.plant_groups[i]:
                 if plant.state != c.SLEEP:
                     self.checkPlant(plant, i)
+                if plant.name  in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                    pass
                 if plant.health <= 0:
                     self.killPlant(plant)
 

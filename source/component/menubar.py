@@ -502,7 +502,7 @@ class MoveBar():
         if (self.current_time - self.create_timer) > c.MOVEBAR_CARD_FRESH_TIME:
             if self.createCard():
                 self.create_timer = self.current_time
-
+        #print(self.getBowlingNum())
     # return a dict of cards like  {'RedWallNutBowling': 2, 'WallNutBowling': 2}
 
     def getCardList(self):
@@ -539,3 +539,11 @@ class MoveBar():
         surface.blit(self.image, self.rect)
         for card in self.card_list:
             card.draw(surface)
+
+    def getBowlingNum(self):
+        all_plant_list = self.card_list
+        bowling_list=[]
+        for _ in all_plant_list:
+            if _.plant_name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                bowling_list.append(_.plant_name)
+        return dict(Counter(bowling_list))
