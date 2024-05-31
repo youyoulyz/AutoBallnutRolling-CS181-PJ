@@ -964,6 +964,7 @@ class Level(tool.State):
                 new_plant = plant.IceShroom(x, y)
             case c.HYPNOSHROOM:
                 new_plant = plant.HypnoShroom(x, y)
+            # TODO
             case c.WALLNUTBOWLING:
                 new_plant = plant.WallNutBowling(x, y, map_y, self)
             case c.REDWALLNUTBOWLING:
@@ -1018,6 +1019,7 @@ class Level(tool.State):
             self.menubar.decreaseSunValue(self.select_plant.sun_cost)
             self.menubar.setCardFrozenTime(self.plant_name)
         else:
+            # TODO
             self.menubar.deleateCard(self.select_plant)
 
         if self.bar_type != c.CHOOSEBAR_BOWLING:    # 坚果保龄球关卡无需考虑格子被占用的情况
@@ -1233,9 +1235,11 @@ class Level(tool.State):
                             target_plant.changeDirection(i)
                             # 播放撞击音效
                             c.SOUND_BOWLING_IMPACT.play()
+                            print("Crashed by BOWLING")
                     elif target_plant.name == c.REDWALLNUTBOWLING:
                         if target_plant.state == c.IDLE:
                             target_plant.setAttack()
+                            print("Crashed by BOWLINGBOMB")
                     elif target_plant.name == c.GIANTWALLNUT:
                         zombie.health = 0
                         c.SOUND_BOWLING_IMPACT.play()
