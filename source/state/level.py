@@ -5,8 +5,8 @@ import logging
 from .. import tool
 from .. import constants as c
 from ..component import map, plant, zombie, menubar
-from BowlingAgent import bowling_agent
-from BowlingAgent import Counter
+from .BowlingAgent import bowling_agent
+from .BowlingAgent import Counter
 logger = logging.getLogger("main")
 
 
@@ -37,6 +37,9 @@ class Level(tool.State):
         #初始化预测变量
         self.predict_cnt=0
         self.collision_count=0
+        
+        #add: 初始化agent
+        self.BowlingAgent = bowling_agent()
 
     def loadMap(self):
         # 冒险模式
@@ -1045,19 +1048,7 @@ class Level(tool.State):
         # 播放种植音效
         c.SOUND_PLANT.play()
         #self.addPlantByMe()
-    
-    #add: 获取合法动作
-    def get_legal_actions(self):
-        action = []
-        card_list = self.menubar.getCardList()
-        flag_0 = 0
-        flag_1 = 0
-        if c.WALLNUTBOWLING in card_list:
-            flag_0 = 1
-        if c.REDWALLNUTBOWLING in card_list:
-            flag_1 = 1
         
-    
     # 在 x,y位置上种植0,1两种植物，并消耗对应的传送带卡片
     # ! USER
     def addPlantByMe(self, ind_x, ind_y, plant_type):
