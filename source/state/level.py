@@ -835,10 +835,11 @@ class Level(tool.State):
         self.checkGameState()
         # do return zombie position
         self.getZombiesPositions()
-        # do decision here
-        self.autoPlantWallnutOntoTheLeftMostZombie()
+        
         # do collision calculation
         self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+        # do decision here
+        self.autoPlantWallnutOntoTheLeftMostZombie()
 
 
     def createZombie(self, name, map_y=None):
