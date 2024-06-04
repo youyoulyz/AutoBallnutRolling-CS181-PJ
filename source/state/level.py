@@ -139,7 +139,7 @@ class Level(tool.State):
 
             # 传送带模式应当增大僵尸容量
             if (self.bar_type != c.CHOOSEBAR_STATIC):
-                zombie_volume += 2
+                zombie_volume += 5
 
             if inevitable_zombie_dict and (wave in inevitable_zombie_dict):
                 for new_zombie in inevitable_zombie_dict[wave]:
@@ -830,10 +830,11 @@ class Level(tool.State):
         self.checkGameState()
         # do return zombie position
         self.getZombiesPositions()
-        # do decision here
-        self.autoPlantWallnutOntoTheLeftMostZombie()
+        
         # do collision calculation
         self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+        # do decision here
+        self.autoPlantWallnutOntoTheLeftMostZombie()
 
 
     def createZombie(self, name, map_y=None):
