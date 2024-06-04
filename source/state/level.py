@@ -397,11 +397,11 @@ class Level(tool.State):
             self.pauseAndCheckMenuOptions(mouse_pos, mouse_click)
             return
 
-        #elif mouse_pos and mouse_click[0]:
+        # elif mouse_pos and mouse_click[0]:
         elif True:
-            #self.panel.checkCardClick(mouse_pos)
+            # self.panel.checkCardClick(mouse_pos)
             # EDITED
-            #if self.panel.checkStartButtonClick(mouse_pos):
+            # if self.panel.checkStartButtonClick(mouse_pos):
             if True:
                 self.initPlay(self.panel.getSelectedCards())
             elif self.inArea(self.little_menu_rect, *mouse_pos):
@@ -765,6 +765,7 @@ class Level(tool.State):
                 self.sun_group.remove(sun)
 
         # 拖动植物或者铲子
+        # TODO
         if not self.drag_plant and mouse_pos and mouse_click[0] and not clicked_sun:
             self.click_result = self.menubar.checkCardClick(mouse_pos)
             if self.click_result:
@@ -923,6 +924,7 @@ class Level(tool.State):
             self.setupHintImage()
         x, y = self.hint_rect.centerx, self.hint_rect.bottom
         map_x, map_y = self.map.getMapIndex(x, y)
+        print("x", x, "y", y)
 
         # 新植物也需要在这里声明
         match self.plant_name:
@@ -1031,6 +1033,34 @@ class Level(tool.State):
 
         # 播放种植音效
         c.SOUND_PLANT.play()
+        self.addPlantByMe()
+    # 在 x,y位置上种植0,1两种植物，并消耗对应的传送带卡片
+
+    def addPlantByMe(self):
+        ind_x = 1
+        ind_y = 1
+        x,y = self.map.getMapGridPos(ind_x,ind_y)
+        plant_type = 0
+        map_x, map_y = self.map.getMapIndex(x, y)
+        print(map_x, map_y)
+        
+        set_flag=0
+        if plant_type == 0:
+            if self.menubar.deleteSpecificTypeOfCard(c.WALLNUTBOWLING):
+                new_plant = plant.WallNutBowling(x, y, map_y, self)
+                set_flag=1
+        elif plant_type == 1:
+            if self.menubar.deleteSpecificTypeOfCard(c.REDWALLNUTBOWLING):
+                new_plant = plant.RedWallNutBowling(x, y, map_y)
+                set_flag=1
+        
+        if set_flag==1:
+            self.plant_groups[map_y].add(new_plant)
+            self.new_plant_and_positon = (new_plant.name, (map_x, map_y))
+            return True
+        else:
+            print("no card for auto plant!")
+            return False
 
     def setupHintImage(self):
         pos = self.canSeedPlant(self.plant_name)
@@ -1286,39 +1316,39 @@ class Level(tool.State):
 
     # ADD HERE
     def getZombiesPositions(self):
-        zombies=[]
+        zombies = []
         for i in range(self.map_y_len):
             for zombie in self.zombie_groups[i]:
-                if zombie.state == c.DIE: 
+                if zombie.state == c.DIE:
                     continue
-                zmb_info=[]
+                zmb_info = []
                 # zombie type
                 zmb_info.append(zombie.name)
-                
+
                 zmb_info.append(zombie.state)
                 zmb_info.append(zombie.health)
                 zmb_info.append(zombie.rect.x)
                 zmb_info.append(i)
                 zombies.append(zmb_info)
         return zombies
+
     def getPlantsLocations(self):
-        plant_list=[]
+        plant_list = []
         for i in range(self.map_y_len):
             for plant in self.plant_groups[i]:
-                if plant.name  in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
-                    this_plant =[]
+                if plant.name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                    this_plant = []
                     this_plant.append(plant.name)
                     this_plant.append(i)
-                    this_plant.append(plant.getPosition())    
-                    # 横向速度      
+                    this_plant.append(plant.getPosition())
+                    # 横向速度
                     if plant.name == c.WALLNUTBOWLING:
                         this_plant.append(plant.vel_y)
                     else:
                         this_plant.append(0)
                     plant_list.append(this_plant)
-                    #print(this_plant)
+                    # print(this_plant)
         return plant_list
-
 
     def checkCarCollisions(self):
         for i in range(len(self.cars)):
@@ -1531,7 +1561,7 @@ class Level(tool.State):
             for plant in self.plant_groups[i]:
                 if plant.state != c.SLEEP:
                     self.checkPlant(plant, i)
-                if plant.name  in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                if plant.name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
                     pass
                 if plant.health <= 0:
                     self.killPlant(plant)
@@ -1568,12 +1598,12 @@ class Level(tool.State):
                     self.game_info[c.LEVEL_COMPLETIONS] += 1
                     self.game_info[c.LEVEL_NUM] = 1
                     #self.next = c.AWARD_SCREEN
-                    self.next=c.LEVEL
+                    self.next = c.LEVEL
                     # 播放大胜利音效
                     c.SOUND_FINAL_FANFARE.play()
                 else:
                     #self.next = c.GAME_VICTORY
-                    self.next=c.LEVEL
+                    self.next = c.LEVEL
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             elif self.game_info[c.GAME_MODE] == c.MODE_LITTLEGAME:
@@ -1587,7 +1617,7 @@ class Level(tool.State):
                     c.SOUND_FINAL_FANFARE.play()
                 else:
                     #self.next = c.GAME_VICTORY
-                    self.next=c.LEVEL
+                    self.next = c.LEVEL
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             self.done = True
@@ -1597,7 +1627,7 @@ class Level(tool.State):
             c.SOUND_LOSE.play()
             c.SOUND_SCREAM.play()
             #self.next = c.GAME_LOSE
-            self.next=c.LEVEL
+            self.next = c.LEVEL
             self.done = True
 
     def drawMouseShow(self, surface):

@@ -534,6 +534,14 @@ class MoveBar():
             self.redbowling_num -= 1
         #end
         self.card_list.remove(card)
+    
+    def deleteSpecificTypeOfCard(self, type):
+        for card in self.card_list:
+            if card.plant_name == type:
+                self.deleateCard(card)
+                return True
+        return False
+            
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
