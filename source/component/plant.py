@@ -1174,6 +1174,7 @@ class WallNutBowling(Plant):
         self.vel_y = 0
         self.disable_hit_y = -1
         self.attack_check = c.CHECK_ATTACK_NEVER
+        self.crash_cnt=0
 
     def loadImages(self, name, scale):
         self.loadFrames(self.frames, name, 1)
@@ -1237,7 +1238,8 @@ class WallNutBowling(Plant):
         self.mask = pg.mask.from_surface(self.image)
         # must keep the center postion of image when rotate
         self.rect = self.image.get_rect(center=self.init_rect.center)
-
+    def addCrashCnt(self):
+        self.crash_cnt+=1
 
 class RedWallNutBowling(Plant):
     def __init__(self, x, y):

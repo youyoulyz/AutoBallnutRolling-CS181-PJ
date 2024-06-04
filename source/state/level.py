@@ -32,6 +32,10 @@ class Level(tool.State):
         self.setupBackground()
         self.initState()
 
+        #初始化预测变量
+        self.predict_cnt=0
+        self.collision_count=0
+
     def loadMap(self):
         # 冒险模式
         if self.game_info[c.GAME_MODE] == c.MODE_ADVENTURE:
@@ -827,7 +831,10 @@ class Level(tool.State):
         # do return zombie position
         self.getZombiesPositions()
         # do decision here
-        # TODO
+        self.autoPlantWallnutOntoTheLeftMostZombie()
+        # do collision calculation
+        self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+
 
     def createZombie(self, name, map_y=None):
         # 有指定时按照指定生成，无指定时随机位置生成
@@ -1023,7 +1030,7 @@ class Level(tool.State):
             self.menubar.decreaseSunValue(self.select_plant.sun_cost)
             self.menubar.setCardFrozenTime(self.plant_name)
         else:
-            # TODO
+            
             self.menubar.deleateCard(self.select_plant)
 
         if self.bar_type != c.CHOOSEBAR_BOWLING:    # 坚果保龄球关卡无需考虑格子被占用的情况
@@ -1035,14 +1042,15 @@ class Level(tool.State):
 
         # 播放种植音效
         c.SOUND_PLANT.play()
-        self.addPlantByMe()
+        #self.addPlantByMe()
     # 在 x,y位置上种植0,1两种植物，并消耗对应的传送带卡片
-
-    def addPlantByMe(self):
-        ind_x = 1
-        ind_y = 1
+    # ! USER
+    def addPlantByMe(self, ind_x, ind_y, plant_type):
+        #ind_x = 1
+        #ind_y = 1
+        #plant_type = 0
         x,y = self.map.getMapGridPos(ind_x,ind_y)
-        plant_type = 0
+        
         map_x, map_y = self.map.getMapIndex(x, y)
         print(map_x, map_y)
         
@@ -1063,7 +1071,40 @@ class Level(tool.State):
         else:
             print("no card for auto plant!")
             return False
+    #!USER
+    def autoPlantWallnutOntoTheLeftMostZombie(self):
+        self.predict_cnt+=1
+        if(self.predict_cnt<100):
+            return
+        self.predict_cnt=0
+        print("enter predict procedure")
+        print("Check total collision count from last period", self.collision_count)
+        self.collision_count=0
+        # check the position of the left most zombie
+        zombies_list = self.getZombiesPositions()
+        min_y=-1
+        #print(zombies_list)
+        # 找到位置x最小的元素
+        if len(zombies_list)>0:
+            min_x_entry = min(zombies_list, key=lambda x: x[3])
 
+            # 返回其位置y
+            min_y = min_x_entry[4]
+        
+            #place a wallnut on min_y,1
+            print("try add wallnut on y=", min_y)
+            self.addPlantByMe(1,min_y,0)
+            
+        
+
+    def calculatePlantCollisions(self):
+        total_cnt=0
+        for i in range(self.map_y_len):
+            for plant in self.plant_groups[i]:
+                if plant.name in [c.WALLNUTBOWLING]:
+                    total_cnt+=plant.crash_cnt
+        return total_cnt
+        
     def setupHintImage(self):
         pos = self.canSeedPlant(self.plant_name)
         if pos and self.mouse_image:
@@ -1268,6 +1309,7 @@ class Level(tool.State):
                             # 播放撞击音效
                             c.SOUND_BOWLING_IMPACT.play()
                             print("Crashed by BOWLING")
+                            target_plant.addCrashCnt()
                     elif target_plant.name == c.REDWALLNUTBOWLING:
                         if target_plant.state == c.IDLE:
                             target_plant.setAttack()
