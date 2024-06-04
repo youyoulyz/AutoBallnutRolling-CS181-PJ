@@ -826,6 +826,8 @@ class Level(tool.State):
         self.checkGameState()
         # do return zombie position
         self.getZombiesPositions()
+        # do decision here
+        # TODO
 
     def createZombie(self, name, map_y=None):
         # 有指定时按照指定生成，无指定时随机位置生成
