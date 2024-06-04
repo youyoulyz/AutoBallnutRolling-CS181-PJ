@@ -1,7 +1,7 @@
-import constants as c
-from state import level
-from component import menubar
-from level import Level
+from .. import constants as c
+from ..state import level
+from ..component import menubar
+from . import level
 import sys
 import inspect
 import heapq
@@ -13,11 +13,66 @@ import numpy
 class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
+        self.eps = 0.3 #探索率
+        self.gamma = 0.3 #衰减率
+        self.alpha = 0.8 #学习率
     
+    def get_qvalue(self, level: level.Level, action:tuple):
+        if level not in self.qvalue.keys():
+            self.qvalue[level] = Counter()
+        return self.qvalue[level][action]
     
+    def get_value_from_qvalue(self, level:level.Level):
+        actions = self.get_legal_actions(level)
+        if len(actions) == 0:
+            return 0.0
+        return max([self.get_qvalue(level, action) for action in actions])
     
+    def compute_action_from_q(self, level:level.Level):
+        actions = self.get_legal_actions(level)
+        if len(actions) == 0:
+            return None
+        self.get_value_from_qvalue(level)
+        return self.qvalue[level].argMax()
+    
+    def get_action(self, level):
+        actions = self.get_legal_actions(level)
+        action = None
+        if not len(actions) == 0:
+            r = random.random()
+            if r < self.eps:  random_choose = 0
+            else: random_choose = 1
+            if random_choose:
+                action = self.compute_action_from_q(level)
+            else:
+                action = random.choice(actions)
+        return action
         
+        
+    def update(self, level:level.Level, action:tuple, next_level, reward:float):
+        current_q = self.get_qvalue(level, action)
+        self.qvalue[level][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_qvalue(next_level))
     
+    
+    #add: 获取合法动作
+    def get_legal_actions(self, level:level.Level)->list:
+        actions = []
+        card_list = level.menubar.getCardList()
+        flag_0 = 0
+        flag_1 = 0
+        if c.WALLNUTBOWLING in card_list:
+            flag_0 = 1
+        if c.REDWALLNUTBOWLING in card_list:
+            flag_1 = 1
+            
+        for x in range(3):
+            for y in range(5):
+                if flag_0:
+                    actions.append((x, y, c.WALLNUTBOWLING))
+                if flag_1:
+                    actions.append((x, y, c.REDWALLNUTBOWLING))
+        
+        return actions
         
 #引用自hw5       
 class Counter(dict):
