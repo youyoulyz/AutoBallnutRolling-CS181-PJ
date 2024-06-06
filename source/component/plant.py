@@ -1206,6 +1206,8 @@ class WallNutBowling(Plant):
         if self.map_y != map_y1 and map_y1 == map_y2:
             # wallnut bowls to another row, should modify which plant group it belongs to
             self.level.plant_groups[self.map_y].remove(self)
+            if map_y1>4:
+                map_y1=4
             self.level.plant_groups[map_y1].add(self)
             self.map_y = map_y1
 
