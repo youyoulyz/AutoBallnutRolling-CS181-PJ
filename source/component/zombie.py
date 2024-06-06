@@ -11,7 +11,15 @@ class Zombie(pg.sprite.Sprite):
                     damage=c.ZOMBIE_ATTACK_DAMAGE,  can_swim=False):
         pg.sprite.Sprite.__init__(self)
 
+        #add:将死状态
+        self.set_to_die = 0
         self.name = name
+        if name == c.NORMAL_ZOMBIE:
+            self.set_to_die = 1
+        if name == c.CONEHEAD_ZOMBIE:
+            self.set_to_die = 2
+        if name == c.BUCKETHEAD_ZOMBIE:
+            self.set_to_die = 3
         self.frames = []
         self.frame_index = 0
         self.loadImages()
@@ -44,8 +52,6 @@ class Zombie(pg.sprite.Sprite):
         self.animate_timer = 0
         self.attack_timer = 0
         self.state = c.WALK
-        #add:将死状态
-        self.set_to_die = 0
         self.animate_interval = 150
         self.walk_animate_interval = 180
         self.attack_animate_interval = 100

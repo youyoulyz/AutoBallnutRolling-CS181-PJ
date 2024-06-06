@@ -9,6 +9,11 @@ from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
 logger = logging.getLogger("main")
 
+class level_info():
+    def _init_(self):
+        self.zombies = {}
+        self.cards = {}
+
 
 class Level(tool.State):
     def __init__(self):
@@ -20,8 +25,10 @@ class Level(tool.State):
         self.game_info = persist
         self.persist = self.game_info
         self.game_info[c.CURRENT_TIME] = current_time
-        #add:需要在一次level中持续更新的信息
-        self.level_info = {}
+        #add:需要在一次level中持续更新的信息;当先level采取的动作;动作的prediction
+        self.level_info = level_info()
+        self.qlearning_action = None
+        self.prediction_result = 0
 
         # 暂停状态
         self.pause = False
@@ -351,14 +358,18 @@ class Level(tool.State):
             self.cars.append(plant.Car(-45, y+20, i))
 
     # 更新函数每帧被调用，将鼠标事件传入给状态处理函数
+    #add:agent执行动作后，在此处更新自身q值，获取新的状态
     def update(self, surface, current_time, mouse_pos, mouse_click):
         self.current_time = self.game_info[c.CURRENT_TIME] = self.gameTime(
             current_time)
+        current_level_state = self.level_info
         if self.state == c.CHOOSE:
             self.choose(mouse_pos, mouse_click)
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
-
+        next_level_state = self.update_level_state()
+        self.bowlingAgent.update(current_level_state, self.qlearning_action, next_level_state, self.get_reward(self.prediction_result))
+        
         self.draw(surface)
 
     def gameTime(self, current_time):
@@ -827,7 +838,9 @@ class Level(tool.State):
                 car.update(self.game_info)
 
         self.menubar.update(self.current_time)
-
+        
+        #add:agent决策
+        self.prediction_result = self.do_action()
         # 检查碰撞
         self.checkBulletCollisions()
         self.checkZombieCollisions()
@@ -840,22 +853,20 @@ class Level(tool.State):
         self.getZombiesPositions()
         
         # do collision calculation
-        self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+        # self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
-        self.autoPlantWallnutOntoTheLeftMostZombie()
+        #self.autoPlantWallnutOntoTheLeftMostZombie()
         
     #add:获取有效信息
-    def update_level_state(self)->dict:
-        self.level_info["victory"] = self.checkVictory()
-        self.level_info["lose"] = self.checkLose()
-        #[name,state,health,x,y]
-        self.level_info["zombie_pos"] = self.getZombiesPositions()
+    def update_level_state(self)->level_info:
+        self.level_info.zombies = self.zombie_groups
+        self.level_info.cards = self.menubar.getBowlingNum()
         return self.level_info
         
         
         
     #add:奖励函数reward
-    def get_reward(self, planting_y):
+    def get_reward(self, prediction):
         reward = 0
         if not self.checkLose():
             reward += 1
@@ -865,19 +876,92 @@ class Level(tool.State):
         elif self.checkVictory():
             reward = 100
             return reward
-        for zombie in self.level_info["zomble_pos"]:
-            if planting_y == zombie[4]:
-                reward += 5
-            
+        reward += prediction
+        reward += len(self.cars)
             
         return reward
-
+    
+    #add:执行动作,并对当前动作预测
     def do_action(self):
-        (x, y, plant_type) = self.bowlingAgent.get_action(self.level_info)
-        self.addPlantByMe(x, y, plant_type)
-        return y
+        self.qlearning_action = self.bowlingAgent.get_action(self.update_level_state())
+        print(self.qlearning_action)
+        if self.qlearning_action == None:
+            return 0
+        self.addPlantByMe(self.qlearning_action[0], self.qlearning_action[1], self.qlearning_action[2])
+        plant_type = self.qlearning_action[2]
+        y = self.qlearning_action[1]
+        x = self.qlearning_action[0]
+        x = x*c.GRID_X_SIZE + c.MAP_OFFSET_X
+        predict_hit = 0 #预计碰撞次数
+        min_zom_x = -50
+        target_zom = [0]
+        for zombie in self.zombie_groups[y]:
+            if zombie.rect.x < min_zom_x and zombie.rect.x > x and zombie.set_to_die != 0:
+                min_zom_x = zombie.rect.x
+                target_zom[0] = zombie
+        if min_zom_x < 0:
+            return -100
         
+        if plant_type == 0:
+            target_zom[0].set_to_die -= 1
+            if y == 0:
+                predict_hit = self.prediction(x, 1, 0, 1)
+            elif y == 4:
+                predict_hit = self.prediction(x, 3, 1, 0)
+            else:
+                predict_hit = 0.5*self.prediction(x, y-1, 1, 0) + 0.5*self.prediction(x, y+1, 0, 1)
+                
+        elif plant_type == 1:
+            zom_grid_x = (min_zom_x-c.MAP_OFFSET_X) // c.GRID_X_SIZE
+            if y == 0:
+                for i in range(2):
+                    for z in self.zombie_groups[i]:
+                        victim_grid_x = (z.rect.x - c.MAP_OFFSET_X) // c.GRID_X_SIZE
+                        if abs(victim_grid_x - zom_grid_x) <= 1 and z.set_to_die != 0:
+                            predict_hit += 1
+                            z.set_to_die = 0
+            elif y == 4:
+                for i in range(3,5):
+                    for z in self.zombie_groups[i]:
+                        victim_grid_x = (z.rect.x - c.MAP_OFFSET_X) // c.GRID_X_SIZE
+                        if abs(victim_grid_x - zom_grid_x) <= 1 and z.set_to_die != 0:
+                            predict_hit += 1
+                            z.set_to_die = 0
+            else:
+                for i in range(y-1, y+2):
+                    for z in self.zombie_groups[i]:
+                        victim_grid_x = (z.rect.x - c.MAP_OFFSET_X) // c.GRID_X_SIZE
+                        if abs(victim_grid_x - zom_grid_x) <= 1 and z.set_to_die != 0:
+                            predict_hit += 1
+                            z.set_to_die = 0
 
+        return predict_hit
+    #add:预测函数 
+    def prediction(self, xx_1, yy_1, flag_up, flag_down):
+        prediction = 0
+        while(xx_1 <= c.SCREEN_WIDTH + 25):
+            xx_1 += c.GRID_X_SIZE
+            if yy_1 < 0:
+                yy_1 = 1
+                flag_down = 1
+                flag_up = 0
+            elif yy_1 > 4:
+                yy_1 = 3
+                flag_down = 0
+                flag_up = 1
+            
+            
+            for z in self.zombie_groups[yy_1]:
+                if abs(z.rect.x - xx_1) < c.GRID_X_SIZE/2 and z.set_to_die != 0:
+                    z.set_to_die -= 1
+                    prediction += 1
+                    break
+            
+            if flag_down:
+                yy_1 += 1
+            elif flag_up:
+                yy_1 -= 1
+        return prediction
 
     def createZombie(self, name, map_y=None):
         # 有指定时按照指定生成，无指定时随机位置生成
@@ -1105,7 +1189,7 @@ class Level(tool.State):
                 set_flag=1
         elif plant_type == 1:
             if self.menubar.deleteSpecificTypeOfCard(c.REDWALLNUTBOWLING):
-                new_plant = plant.RedWallNutBowling(x, y, map_y)
+                new_plant = plant.RedWallNutBowling(x, y)
                 set_flag=1
         
         if set_flag==1:
@@ -1416,7 +1500,10 @@ class Level(tool.State):
                 zmb_info.append(zombie.health)
                 zmb_info.append(zombie.rect.x)
                 zmb_info.append(i)
+                zmb_info.append(zombie.set_to_die)
                 zombies_info.append(zmb_info)
+        print(self.menubar.getBowlingNum())
+        print(zombies_info)
         return zombies_info
 
     def getPlantsLocations(self):

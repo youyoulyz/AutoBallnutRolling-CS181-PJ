@@ -16,52 +16,53 @@ class bowling_agent():
         self.gamma = 0.3 #衰减率
         self.alpha = 0.8 #学习率
     
-    def get_qvalue(self, level, action:tuple):
-        if level not in self.qvalue.keys():
-            self.qvalue[level] = Counter()
-        return self.qvalue[level][action]
+    def get_qvalue(self, level_state, action:tuple):
+        if level_state not in self.qvalue.keys():
+            self.qvalue[level_state] = Counter()
+        return self.qvalue[level_state][action]
     
-    def get_value_from_qvalue(self, level):
-        actions = self.get_legal_actions(level)
+    def get_value_from_qvalue(self, level_state):
+        actions = self.get_legal_actions(level_state)
         if len(actions) == 0:
             return 0.0
-        return max([self.get_qvalue(level, action) for action in actions])
+        return max([self.get_qvalue(level_state, action) for action in actions])
     
-    def compute_action_from_q(self, level):
-        actions = self.get_legal_actions(level)
+    def compute_action_from_q(self, level_state):
+        actions = self.get_legal_actions(level_state)
         if len(actions) == 0:
             return None
-        self.get_value_from_qvalue(level)
-        return self.qvalue[level].argMax()
+        self.get_value_from_qvalue(level_state)
+        return self.qvalue[level_state].argMax()
     
-    def get_action(self, level):
-        actions = self.get_legal_actions(level)
+    def get_action(self, level_state):
+        actions = self.get_legal_actions(level_state)
         action = None
         if not len(actions) == 0:
             r = random.random()
             if r < self.eps:  random_choose = 0
             else: random_choose = 1
             if random_choose:
-                action = self.compute_action_from_q(level)
-            else:
                 action = random.choice(actions)
+            else:
+                action = self.compute_action_from_q(level_state)
         return action
         
         
-    def update(self, level, action:tuple, next_level, reward:float):
-        current_q = self.get_qvalue(level, action)
-        self.qvalue[level][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_qvalue(next_level))
+    def update(self, level_state, action:tuple, next_level_state, reward:float):
+        current_q = self.get_qvalue(level_state, action)
+        self.qvalue[level_state][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_value_from_qvalue(next_level_state))
     
     
     #add: 获取合法动作
-    def get_legal_actions(self, level)->list:
+    def get_legal_actions(self, level_state)->list:
         actions = []
-        card_list = level.menubar.getCardList()
+        actions.append(None)
+        card_list = level_state.cards
         flag_0 = 0
         flag_1 = 0
-        if c.WALLNUTBOWLING in card_list:
+        if card_list[c.WALLNUTBOWLING]>0:
             flag_0 = 1
-        if c.REDWALLNUTBOWLING in card_list:
+        if card_list[c.REDWALLNUTBOWLING]>0:
             flag_1 = 1
             
         for x in range(3):

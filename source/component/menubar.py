@@ -554,4 +554,9 @@ class MoveBar():
         for _ in all_plant_list:
             if _.plant_name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
                 bowling_list.append(_.plant_name)
-        return dict(Counter(bowling_list))
+        result = dict(Counter(bowling_list))
+        if c.WALLNUTBOWLING not in result.keys():
+            result[c.WALLNUTBOWLING] = 0
+        if c.REDWALLNUTBOWLING not in result.keys():
+            result[c.REDWALLNUTBOWLING] = 0
+        return result
