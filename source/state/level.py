@@ -7,14 +7,23 @@ from .. import constants as c
 from ..component import map, plant, zombie, menubar
 from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
+import copy
 logger = logging.getLogger("main")
 LOOP_NUM = 100
 
+""" #add:state定义
 class level_info():
-    def _init_(self):
-        #self.zombies = {}
+    def __init__(self):
+        self.zombies_num = 0
         self.cards = {}
-
+    
+    #add:传出深拷贝
+    def deepcopy(self):
+        info_copy = level_info()
+        info_copy.zombies_num = self.zombies_num
+        info_copy.cards = self.cards.copy()
+        return info_copy """
+        
 
 class Level(tool.State):
     def __init__(self):
@@ -28,11 +37,14 @@ class Level(tool.State):
         self.persist = self.game_info
         self.game_info[c.CURRENT_TIME] = current_time
         #add:需要在一次level中持续更新的信息;当先level采取的动作;动作的prediction
-        self.level_info = level_info()
+        #self.level_info = level_info()
         self.qlearning_action = None
         self.prediction_result = 0
         #add:局数计数器
         self.level_num += 1
+        self.win_num = 0
+        self.lose_num = 0
+        self.total_car = 0
         print("the ", self.level_num, " th round start")
 
         # 暂停状态
@@ -367,14 +379,22 @@ class Level(tool.State):
     def update(self, surface, current_time, mouse_pos, mouse_click):
         self.current_time = self.game_info[c.CURRENT_TIME] = self.gameTime(
             current_time)
-        current_level_state = self.level_info
+        #tip:获取当前level state
+        #print(len(self.menubar.card_list))
+        current_cards = self.cardlist_to_tuple()
+        #add:获取上一状态的car数量
+        old_car = len(self.cars)
         if self.state == c.CHOOSE:
             self.choose(mouse_pos, mouse_click)
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
-        next_level_state = self.update_level_state()
-        self.bowlingAgent.update(current_level_state, self.qlearning_action, next_level_state, self.get_reward(self.prediction_result))
-        
+            
+        #tip:获取做动作更新后的level state
+        next_cards = self.cardlist_to_tuple()
+        action = self.qlearning_action
+        #agent更新
+        self.bowlingAgent.update(current_cards, action, next_cards, self.get_reward(self.prediction_result, old_car))
+
         self.draw(surface)
 
     def gameTime(self, current_time):
@@ -845,7 +865,7 @@ class Level(tool.State):
         self.menubar.update(self.current_time)
         
         #add:agent决策
-        self.prediction_result = self.do_action()
+        self.agent_make_decision()
         # 检查碰撞
         self.checkBulletCollisions()
         self.checkZombieCollisions()
@@ -862,48 +882,65 @@ class Level(tool.State):
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
         
-    #add:获取有效信息
-    def update_level_state(self)->level_info:
-        #self.level_info.zombies = self.zombie_groups
-        self.level_info.cards = self.menubar.getBowlingNum()
-        return self.level_info
-        
-        
+    #add:获取卡组
+    def cardlist_to_tuple(self)->tuple:
+        cardlist = self.menubar.card_list
+        num_bowling = 0
+        num_boom = 0
+        for card in cardlist:
+            if card.plant_name == c.WALLNUTBOWLING:
+                num_bowling += 1
+            elif card.plant_name == c.REDWALLNUTBOWLING:
+                num_boom += 1
+        return (num_bowling, num_boom)
         
     #add:奖励函数reward
-    def get_reward(self, prediction):
+    def get_reward(self, prediction, old_car):
         reward = 0
         if not self.checkLose():
             reward += 1
         elif self.checkLose():
-            reward = -500
+            reward = -10000
             return reward
         elif self.checkVictory():
-            reward = 500
+            if len(self.cars) == 5:
+                return 10000
+            if len(self.cars) == 4:
+                return 200
+            if len(self.cars) == 3:
+                return 0
+            if len(self.cars) == 2:
+                return -1000
+            if len(self.cars) == 1:
+                return -5000
+            if len(self.cars) == 0:
+                return -10000
             return reward
         reward += 10*prediction
-        reward -= 10/len(self.cars)
+        if len(self.cars) < old_car:
+            reward -= 1000
         threat = 0
         zombies_list = self.getZombiesPositions()
         if len(zombies_list)>0:
             min_x_entry = min(zombies_list, key=lambda x: x[3])
             reward -= -1000/(min_x_entry[3]+1e-5)
-        """ for zombie in self.getZombiesPositions():
+        for zombie in self.getZombiesPositions():
             if(zombie[0] == c.NORMAL_ZOMBIE):
                 threat -= 40/(zombie[3]+1e-5)
             elif(zombie[0] == c.CONEHEAD_ZOMBIE):
                 threat -= 80/(zombie[3]+1e-5)
             elif(zombie[0] == c.BUCKETHEAD_ZOMBIE):
-                threat -= 120/(zombie[3]+1e-5) """
-       # reward += 0.1*threat
-        reward += 10*len(self.menubar.card_list)
-        if prediction > 0:
-            print("reward: ",reward, "prediction: ",10*prediction)
+                threat -= 120/(zombie[3]+1e-5) 
+        reward += 0.1*threat/(len(zombies_list)+1e-5)
+        reward += 2*len(self.menubar.card_list)
+        #if prediction > 0:
+            #print("reward: ",reward, "prediction: ",10*prediction)
         return reward
     
     #add:执行动作,并对当前动作预测
     def do_action(self):
-        self.qlearning_action = self.bowlingAgent.get_action(self.update_level_state())
+        current_cards = self.cardlist_to_tuple()
+        self.qlearning_action = self.bowlingAgent.get_action(current_cards)
         #print(self.qlearning_action)
         if self.qlearning_action == None:
             return 0
@@ -911,25 +948,26 @@ class Level(tool.State):
         plant_type = self.qlearning_action[2]
         y = self.qlearning_action[1]
         x = self.qlearning_action[0]
-        x = x*c.GRID_X_SIZE + c.MAP_OFFSET_X
         predict_hit = 0 #预计碰撞次数
         min_zom_x = 10000
         target_zom = [0]
         for zombie in self.zombie_groups[y]:
-            if zombie.rect.x < min_zom_x and zombie.rect.x > x and zombie.set_to_die != 0:
+            if zombie.rect.x < min_zom_x and (zombie.rect.x - c.MAP_OFFSET_X)//c.GRID_X_SIZE >= x and zombie.set_to_die != 0:
                 min_zom_x = zombie.rect.x
                 target_zom[0] = zombie
         if min_zom_x >= 10000:
             return -10
         
         if plant_type == 0:
+            #fix:第一次碰撞没算上
             target_zom[0].set_to_die -= 1
+            predict_hit += 1
             if y == 0:
-                predict_hit = self.prediction(x, 1, 0, 1)
+                predict_hit += self.prediction(x, 1, 0, 1)
             elif y == 4:
-                predict_hit = self.prediction(x, 3, 1, 0)
+                predict_hit += self.prediction(x, 3, 1, 0)
             else:
-                predict_hit = 0.5*self.prediction(x, y-1, 1, 0) + 0.5*self.prediction(x, y+1, 0, 1)
+                predict_hit += 0.5*self.prediction(x, y-1, 1, 0) + 0.5*self.prediction(x, y+1, 0, 1)
                 
         elif plant_type == 1:
             zom_grid_x = (min_zom_x-c.MAP_OFFSET_X) // c.GRID_X_SIZE
@@ -956,6 +994,7 @@ class Level(tool.State):
                             z.set_to_die = 0
 
         return predict_hit
+            
     #add:预测函数 
     def prediction(self, xx_1, yy_1, flag_up, flag_down):
         prediction = 0
@@ -1241,8 +1280,17 @@ class Level(tool.State):
         
             #place a wallnut on min_y,1
             #print("try add wallnut on y=", min_y)
-            self.addPlantByMe(1,min_y,0)
-            
+            #add:两个都会选
+            if not self.addPlantByMe(1,min_y,0):
+                self.addPlantByMe(1,min_y,1)
+    
+    #add:agent延时决策
+    def agent_make_decision(self):
+        self.predict_cnt+=1
+        if(self.predict_cnt<25):
+            return
+        self.predict_cnt=0
+        self.prediction_result = self.do_action()
     
 
     def calculatePlantCollisions(self):
@@ -1813,12 +1861,16 @@ class Level(tool.State):
                     #add:到达预定次数停止
                     if self.level_num == LOOP_NUM:
                         self.next = c.GAME_VICTORY
+                        self.total_car /= 100
+                        print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
                     else:
                         self.next = c.LEVEL
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             self.done = True
             print("the " ,self.level_num, " th round succeed")
+            self.win_num += 1
+            self.total_car += len(self.cars)
             
             self.saveUserData()
         elif self.checkLose():
@@ -1828,9 +1880,13 @@ class Level(tool.State):
             #add:到达预定次数停止
             if self.level_num == LOOP_NUM:
                 self.next = c.GAME_LOSE
+                self.total_car /= 100
+                print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
             else:
                 self.next = c.LEVEL
             self.done = True
+            self.lose_num += 1
+            self.total_car += len(self.cars)
             print("the " ,self.level_num, " th round fail")
 
     def drawMouseShow(self, surface):
