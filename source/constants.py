@@ -112,6 +112,8 @@ GAME_VICTORY = "game victory"
 LEVEL = "level"
 AWARD_SCREEN = "award screen"
 HELP_SCREEN = "help screen"
+#add:agent名常量
+BOWLING_AGENT = "Bowling Agent"
 
 # 界面图片文件名
 MAIN_MENU_IMAGE = "MainMenu"

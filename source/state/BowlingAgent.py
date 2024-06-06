@@ -1,7 +1,6 @@
 from .. import constants as c
 from ..state import level
 from ..component import menubar
-from . import level
 import sys
 import inspect
 import heapq
@@ -17,18 +16,18 @@ class bowling_agent():
         self.gamma = 0.3 #衰减率
         self.alpha = 0.8 #学习率
     
-    def get_qvalue(self, level: level.Level, action:tuple):
+    def get_qvalue(self, level, action:tuple):
         if level not in self.qvalue.keys():
             self.qvalue[level] = Counter()
         return self.qvalue[level][action]
     
-    def get_value_from_qvalue(self, level:level.Level):
+    def get_value_from_qvalue(self, level):
         actions = self.get_legal_actions(level)
         if len(actions) == 0:
             return 0.0
         return max([self.get_qvalue(level, action) for action in actions])
     
-    def compute_action_from_q(self, level:level.Level):
+    def compute_action_from_q(self, level):
         actions = self.get_legal_actions(level)
         if len(actions) == 0:
             return None
@@ -49,13 +48,13 @@ class bowling_agent():
         return action
         
         
-    def update(self, level:level.Level, action:tuple, next_level, reward:float):
+    def update(self, level, action:tuple, next_level, reward:float):
         current_q = self.get_qvalue(level, action)
         self.qvalue[level][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_qvalue(next_level))
     
     
     #add: 获取合法动作
-    def get_legal_actions(self, level:level.Level)->list:
+    def get_legal_actions(self, level)->list:
         actions = []
         card_list = level.menubar.getCardList()
         flag_0 = 0
@@ -68,9 +67,9 @@ class bowling_agent():
         for x in range(3):
             for y in range(5):
                 if flag_0:
-                    actions.append((x, y, c.WALLNUTBOWLING))
+                    actions.append((x, y, 0))
                 if flag_1:
-                    actions.append((x, y, c.REDWALLNUTBOWLING))
+                    actions.append((x, y, 1))
         
         return actions
         

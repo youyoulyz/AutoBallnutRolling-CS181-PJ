@@ -13,11 +13,15 @@ logger = logging.getLogger("main")
 class Level(tool.State):
     def __init__(self):
         tool.State.__init__(self)
+        #add: 初始化agent
+        self.bowlingAgent = bowling_agent()
 
     def startup(self, current_time, persist):
         self.game_info = persist
         self.persist = self.game_info
         self.game_info[c.CURRENT_TIME] = current_time
+        #add:需要在一次level中持续更新的信息
+        self.level_info = {}
 
         # 暂停状态
         self.pause = False
@@ -38,8 +42,7 @@ class Level(tool.State):
         self.predict_cnt=0
         self.collision_count=0
         
-        #add: 初始化agent
-        self.BowlingAgent = bowling_agent()
+        
 
     def loadMap(self):
         # 冒险模式
@@ -840,6 +843,40 @@ class Level(tool.State):
         self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
         self.autoPlantWallnutOntoTheLeftMostZombie()
+        
+    #add:获取有效信息
+    def update_level_state(self)->dict:
+        self.level_info["victory"] = self.checkVictory()
+        self.level_info["lose"] = self.checkLose()
+        #[name,state,health,x,y]
+        self.level_info["zombie_pos"] = self.getZombiesPositions()
+        return self.level_info
+        
+        
+        
+    #add:奖励函数reward
+    def get_reward(self, planting_y):
+        reward = 0
+        if not self.checkLose():
+            reward += 1
+        elif self.checkLose():
+            reward = -100
+            return reward
+        elif self.checkVictory():
+            reward = 100
+            return reward
+        for zombie in self.level_info["zomble_pos"]:
+            if planting_y == zombie[4]:
+                reward += 5
+            
+            
+        return reward
+
+    def do_action(self):
+        (x, y, plant_type) = self.bowlingAgent.get_action(self.level_info)
+        self.addPlantByMe(x, y, plant_type)
+        return y
+        
 
 
     def createZombie(self, name, map_y=None):
@@ -1102,7 +1139,7 @@ class Level(tool.State):
             print("try add wallnut on y=", min_y)
             self.addPlantByMe(1,min_y,0)
             
-        
+    
 
     def calculatePlantCollisions(self):
         total_cnt=0
@@ -1367,7 +1404,7 @@ class Level(tool.State):
 
     # ADD HERE
     def getZombiesPositions(self):
-        zombies = []
+        zombies_info = []
         for i in range(self.map_y_len):
             for zombie in self.zombie_groups[i]:
                 if zombie.state == c.DIE:
@@ -1375,13 +1412,12 @@ class Level(tool.State):
                 zmb_info = []
                 # zombie type
                 zmb_info.append(zombie.name)
-
                 zmb_info.append(zombie.state)
                 zmb_info.append(zombie.health)
                 zmb_info.append(zombie.rect.x)
                 zmb_info.append(i)
-                zombies.append(zmb_info)
-        return zombies
+                zombies_info.append(zmb_info)
+        return zombies_info
 
     def getPlantsLocations(self):
         plant_list = []
@@ -1658,7 +1694,7 @@ class Level(tool.State):
                     # 播放胜利音效
                     c.SOUND_WIN.play()
             elif self.game_info[c.GAME_MODE] == c.MODE_LITTLEGAME:
-                # changed here
+                # changed:游戏状态循环
                 #self.game_info[c.LITTLEGAME_NUM] += 1
                 if self.game_info[c.LITTLEGAME_NUM] >= map.TOTAL_LITTLE_GAME:
                     self.game_info[c.LITTLEGAME_COMPLETIONS] += 1
