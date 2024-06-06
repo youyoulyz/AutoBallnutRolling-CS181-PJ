@@ -13,8 +13,8 @@ class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
         self.eps = 0.3 #探索率
-        self.gamma = 0.3 #衰减率
-        self.alpha = 0.8 #学习率
+        self.gamma = 0.1 #衰减率
+        self.alpha = 0.5 #学习率
     
     def get_qvalue(self, level_state, action:tuple):
         if level_state not in self.qvalue.keys():
@@ -32,15 +32,18 @@ class bowling_agent():
         if len(actions) == 0:
             return None
         self.get_value_from_qvalue(level_state)
-        return self.qvalue[level_state].argMax()
+        max = self.qvalue[level_state].argMax()
+        if max != None:
+            print(max)
+        return max#self.qvalue[level_state].argMax()
     
     def get_action(self, level_state):
         actions = self.get_legal_actions(level_state)
         action = None
         if not len(actions) == 0:
             r = random.random()
-            if r < self.eps:  random_choose = 0
-            else: random_choose = 1
+            if r < self.eps:  random_choose = 1
+            else: random_choose = 0
             if random_choose:
                 action = random.choice(actions)
             else:
