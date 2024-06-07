@@ -388,11 +388,8 @@ class Level(tool.State):
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
             
-        #self.draw(surface)
-        if self.level_num< LOOP_NUM-10:
-            self.drawSimplified(surface)
-        else:
-            self.draw(surface)
+        self.draw(surface)
+
 
 
 
