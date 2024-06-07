@@ -12,40 +12,32 @@ import numpy
 class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
-        self.eps = 0.1 #探索率
-        self.gamma = 0.3 #衰减率
+        self.eps = 1 #探索率
+        self.gamma = 0.8 #衰减率
         self.alpha = 0.5 #学习率
         self.qvalue = Counter()
-        #add:重塑状态空间，只关注卡牌数目
-        """ for i in range(11):
-            for j in range(i+1):
-                self.qvalue[(j, i - j)] = Counter() """ #前普通，后爆炸
-        #print(self.qvalue.keys())
-        
     
-    def get_qvalue(self, card_num:tuple, action:tuple): #状态（暂名card_num，包含：坚果数，爆炸数，五行最近僵尸格子
-        if card_num not in self.qvalue.keys():
-            self.qvalue[card_num] = Counter()
-        return self.qvalue[card_num][action]
+    def get_qvalue(self, state:tuple, action:tuple): #状态 包含：坚果数，爆炸数，每个格子的僵尸血量
+        if state not in self.qvalue.keys():
+            self.qvalue[state] = Counter()
+        return self.qvalue[state][action]
     
-    def get_value_from_qvalue(self, card_num: tuple):
-        actions = self.get_legal_actions(card_num)
+    def get_value_from_qvalue(self, state: tuple):
+        actions = self.get_legal_actions(state)
         if len(actions) == 0:
             return 0.0
-        return max([self.get_qvalue(card_num, action) for action in actions])
+        return max([self.get_qvalue(state, action) for action in actions])
     
-    def compute_action_from_q(self, card_num):
-        actions = self.get_legal_actions(card_num)
+    def compute_action_from_q(self, state):
+        actions = self.get_legal_actions(state)
         if len(actions) == 0:
             return None
-        self.get_value_from_qvalue(card_num)
-        max = self.qvalue[card_num].argMax()
-        """ if max != None:
-            print(max) """
-        return max#self.qvalue[level_state].argMax()
+        for action in actions:
+            self.get_qvalue(state, action)
+        return self.qvalue[state].argMax()
     
-    def get_action(self, card_num):
-        actions = self.get_legal_actions(card_num)
+    def get_action(self, state):
+        actions = self.get_legal_actions(state)
         action = None
         if not len(actions) == 0:
             r = random.random()
@@ -54,26 +46,29 @@ class bowling_agent():
             if random_choose:
                 action = random.choice(actions)
             else:
-                action = self.compute_action_from_q(card_num)
+                action = self.compute_action_from_q(state)
+                if action != None:
+                    print(action) 
         return action
         
         
-    def update(self, card_num:tuple, action:tuple, next_card_num:tuple, reward:float):
-        #print(self.qvalue)
-        current_q = self.get_qvalue(card_num, action)
-        self.qvalue[card_num][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_value_from_qvalue(next_card_num))
+    def update(self, state:tuple, action:tuple, next_state:tuple, reward:float):
+        current_q = self.get_qvalue(state, action)
+        #print(state)
+        #print(self.qvalue[state])
+        self.qvalue[state][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_value_from_qvalue(next_state))
     
     
     #add: 获取合法动作
-    def get_legal_actions(self, card_num:tuple)->list:
+    def get_legal_actions(self, state:tuple)->list:
         actions = []
         actions.append(None)
             
         for x in range(3):
             for y in range(5):
-                if card_num[0] != 0:
+                if state[0] != 0:
                     actions.append((x, y, 0))
-                if card_num[1] != 0:
+                if state[1] != 0:
                     actions.append((x, y, 1))
         return actions
         
@@ -120,7 +115,7 @@ class Counter(dict):
     """
 
     def __getitem__(self, idx):
-        self.setdefault(idx, 0)
+        self.setdefault(idx, -10)
         return dict.__getitem__(self, idx)
 
     def incrementAll(self, keys, count):

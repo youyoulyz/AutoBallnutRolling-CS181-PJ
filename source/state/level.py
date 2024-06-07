@@ -9,7 +9,7 @@ from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
-LOOP_NUM = 100
+LOOP_NUM = 1000
 
 """ #add:state定义
 class level_info():
@@ -47,6 +47,10 @@ class Level(tool.State):
         self.lose_num = 0
         self.total_car = 0
         print("the ", self.level_num, " th round start")
+        
+        #add:实时调整探索率
+        self.bowlingAgent.eps = (0.01**(1/LOOP_NUM))**self.level_num
+        print("eps: ", self.bowlingAgent.eps)
 
         # 暂停状态
         self.pause = False
@@ -376,27 +380,20 @@ class Level(tool.State):
             self.cars.append(plant.Car(-45, y+20, i))
 
     # 更新函数每帧被调用，将鼠标事件传入给状态处理函数
-    #add:agent执行动作后，在此处更新自身q值，获取新的状态
     def update(self, surface, current_time, mouse_pos, mouse_click):
         self.current_time = self.game_info[c.CURRENT_TIME] = self.gameTime(
             current_time)
-        #tip:获取当前level state
-        #print(len(self.menubar.card_list))
-        current_cards = self.cardlist_to_tuple()
-        #add:获取上一状态的car数量
-        old_car = len(self.cars)
         if self.state == c.CHOOSE:
             self.choose(mouse_pos, mouse_click)
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
             
-        #tip:获取做动作更新后的level state
-        next_cards = self.cardlist_to_tuple()
-        action = self.qlearning_action
-        #agent更新
-        self.bowlingAgent.update(current_cards, action, next_cards, self.get_reward(self.prediction_result, old_car))
+        #self.draw(surface)
+        if self.level_num< LOOP_NUM-10:
+            self.drawSimplified(surface)
+        else:
+            self.draw(surface)
 
-        self.draw(surface)
 
     def gameTime(self, current_time):
         # 扣除暂停时间
@@ -752,6 +749,14 @@ class Level(tool.State):
                 return
 
     def play(self, mouse_pos, mouse_click):
+        
+        #add:获取当前状态
+        current_state = self.state_to_tuple()
+        #add:获取上一状态的car数量
+        old_car = len(self.cars)
+        #agent决策，并返回是否决策
+        decided = self.agent_make_decision(current_state)
+        
         # 如果暂停
         if self.show_game_menu:
             self.pauseAndCheckMenuOptions(mouse_pos, mouse_click)
@@ -865,8 +870,7 @@ class Level(tool.State):
 
         self.menubar.update(self.current_time)
         
-        #add:agent决策
-        self.agent_make_decision()
+
         # 检查碰撞
         self.checkBulletCollisions()
         self.checkZombieCollisions()
@@ -877,13 +881,40 @@ class Level(tool.State):
         self.checkGameState()
         # do return zombie position
         self.getZombiesPositions()
+        
+        if decided:
+            #tip:获取做动作更新后的level state
+            #print("decided")
+            next_state = self.state_to_tuple()
+            action = self.qlearning_action
+            #agent更新
+            self.bowlingAgent.update(current_state, action, next_state, self.get_reward(self.prediction_result, old_car))
 
         #print(self.getNearestZombieGridsForEachRow())
         
         # do collision calculation
-        self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+        #self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
+        
+    #add：每个格子上是否存在僵尸（或改为僵尸总血量）
+    def get_zombie_existance_on_each_grid(self)-> list[int,int,int,int,int]:
+        zombie_list=[]
+        for i in range(0, self.map_y_len):
+            zombies_on_row = [0 for _ in range(11)]
+            for zombie in self.zombie_groups[i]:
+                if zombie.state == c.DIE:
+                    continue
+                zombie_grid,_ = self.map.getMapIndex(zombie.rect.x, 0)
+                #print(zombie_grid)
+                zombies_on_row[zombie_grid] = 1
+            """ if pos_x_grid!= 1008600:
+                zombie_list.append(self.map.getMapIndex(pos_x_grid,100)[0])
+            else:
+                zombie_list.append(-1) """
+            zombie_list.append(zombies_on_row)
+        #print(zombie_list)
+        return zombie_list
     
     def getNearestZombieGridsForEachRow(self)-> list[int,int,int,int,int]:
         zombie_list=[]
@@ -900,9 +931,8 @@ class Level(tool.State):
                 zombie_list.append(-1)
         return zombie_list
 
-
-    #add:获取卡组
-    def cardlist_to_tuple(self)->tuple:
+    #add:获取状态tuple
+    def state_to_tuple(self)->tuple:
         cardlist = self.menubar.card_list
         num_bowling = 0
         num_boom = 0
@@ -911,8 +941,8 @@ class Level(tool.State):
                 num_bowling += 1
             elif card.plant_name == c.REDWALLNUTBOWLING:
                 num_boom += 1
-        zombie_list = self.getNearestZombieGridsForEachRow()
-        return (num_bowling, num_boom, zombie_list[0], zombie_list[1], zombie_list[2], zombie_list[3], zombie_list[4])
+        zombie_list = self.get_zombie_existance_on_each_grid()
+        return (num_bowling, num_boom, tuple(zombie_list[0]), tuple(zombie_list[1]), tuple(zombie_list[2]), tuple(zombie_list[3]), tuple(zombie_list[4]))
         
     #add:奖励函数reward
     #add:加入当前动作造成的collision数目
@@ -921,50 +951,52 @@ class Level(tool.State):
         #拖时间
         if not self.checkLose():
             reward += 1
-        #输了扣大分    
+        #输了扣分    
         elif self.checkLose():
-            reward = -10000
+            reward = -500
             return reward
         #赢了按照小车数目给reward，丢车太多与输无异
         elif self.checkVictory():
             if len(self.cars) == 5:
-                return 10000
+                return 500
             if len(self.cars) == 4:
-                return 200
+                return 300
             if len(self.cars) == 3:
-                return 0
+                return 100
             if len(self.cars) == 2:
-                return -1000
+                return -100
             if len(self.cars) == 1:
-                return -5000
+                return -300
             if len(self.cars) == 0:
-                return -10000
+                return -500
             return reward
         
         #根据当前动作的prediction加分
         reward += 10*prediction
+        if self.qlearning_action == None:
+            reward -= 1
         
         #小车数量减少了扣分
-        if len(self.cars) < old_car:
-            reward -= 1000
+        """ if len(self.cars) < old_car:
+            reward -= 1000 """
             
         #僵尸位置扣分
-        threat = 0
-        zombies_list = self.getZombiesPositions()
-        if len(zombies_list)>0:
-            min_x_entry = min(zombies_list, key=lambda x: x[3])
-            reward -= -1000/(min_x_entry[3]+1e-5)
-        for zombie in self.getZombiesPositions():
-            if(zombie[0] == c.NORMAL_ZOMBIE):
-                threat -= 40/(zombie[3]+1e-5)
-            elif(zombie[0] == c.CONEHEAD_ZOMBIE):
-                threat -= 80/(zombie[3]+1e-5)
-            elif(zombie[0] == c.BUCKETHEAD_ZOMBIE):
-                threat -= 120/(zombie[3]+1e-5) 
-        reward += 0.1*threat/(len(zombies_list)+1e-5)
+        # threat = 0
+        # zombies_list = self.getZombiesPositions()
+        # if len(zombies_list)>0:
+        #     min_x_entry = min(zombies_list, key=lambda x: x[3])
+        #     reward -= -1000/(min_x_entry[3]+1e-5)
+        # for zombie in self.getZombiesPositions():
+        #     if(zombie[0] == c.NORMAL_ZOMBIE):
+        #         threat -= 40/(zombie[3]+1e-5)
+        #     elif(zombie[0] == c.CONEHEAD_ZOMBIE):
+        #         threat -= 80/(zombie[3]+1e-5)
+        #     elif(zombie[0] == c.BUCKETHEAD_ZOMBIE):
+        #         threat -= 120/(zombie[3]+1e-5) 
+        # reward += 0.1*threat/(len(zombies_list)+1e-5)
         
         #屯卡加分
-        reward += 2*len(self.menubar.card_list)
+        #reward += 2*len(self.menubar.card_list)
         
         #当前frame碰撞加分
         current_collison = self.calculatePlantCollisions()
@@ -976,7 +1008,7 @@ class Level(tool.State):
     
     #add:执行动作,并对当前动作预测，返回预测值
     def do_action(self):
-        current_cards = self.cardlist_to_tuple()
+        current_cards = self.state_to_tuple()
         self.qlearning_action = self.bowlingAgent.get_action(current_cards) #保存当前决策做的动作
         #print(self.qlearning_action)
         if self.qlearning_action == None:
@@ -995,10 +1027,13 @@ class Level(tool.State):
                 min_zom_x = zombie.rect.x
                 target_zom[0] = zombie
         if min_zom_x >= 10000:
-            return -1000
+            if(plant_type == 0):
+                return -2
+            elif(plant_type == 1):
+                return -10
         printout_x,_ = self.map.getMapIndex(min_zom_x,1)
         #printout_x,_ = self.map.getMapIndex(830,1)
-        print("min_zom_x: ", printout_x)
+        #print("min_zom_x: ", printout_x, "on the ", y+1, "th row")
         if plant_type == 0:
             #fix:第一次碰撞没算上
             target_zom[0].set_to_die -= 1
@@ -1033,7 +1068,7 @@ class Level(tool.State):
                         if abs(victim_grid_x - zom_grid_x) <= 1 and z.set_to_die != 0:
                             predict_hit += z.set_to_die
                             z.set_to_die = 0
-        print("predicted hit:", predict_hit)
+        #print("predicted hit:", predict_hit)
         return predict_hit
             
     #add:预测函数 
@@ -1041,7 +1076,7 @@ class Level(tool.State):
         prediction = 0
         # covert xx_1 yy_1 to grid pos
         xx_1,_ = self.map.getMapIndex(xx_1, 1) #xx_1转化格子数
-        while(xx_1 <= 9):
+        while(xx_1 <= 11):
             
             if flag_down:
                 yy_1 += 1
@@ -1331,12 +1366,13 @@ class Level(tool.State):
                 self.addPlantByMe(1,min_y,1)
     
     #add:agent延时决策
-    def agent_make_decision(self):
+    def agent_make_decision(self, current_state):
         self.predict_cnt+=1
-        if(self.predict_cnt<25):
-            return
+        if(self.predict_cnt<30):
+            return False
         self.predict_cnt=0
         self.prediction_result = self.do_action()
+        return True
     
 
     def calculatePlantCollisions(self):
@@ -2074,3 +2110,28 @@ class Level(tool.State):
                 if self.current_time - self.show_hugewave_approching_time <= 2000:
                     surface.blit(self.huge_wave_approching_image,
                                  self.huge_wave_approching_image_rect)
+                    
+            # draw the cnt
+            font = pg.font.Font(c.FONT_PATH, 40)
+            font.bold = True
+            text = font.render(str(self.level_num), True, c.YELLOWGREEN)
+            text_rect = text.get_rect()
+            text_rect.x = 105
+            text_rect.y = 18
+            surface.blit(text, text_rect)
+            
+    def drawSimplified(self, surface):
+        self.level.blit(self.background, self.viewport, self.viewport)
+        surface.blit(self.level, (0, 0), self.viewport)
+        if self.state==c.PLAY:
+            for i in range(self.map_y_len):
+                if self.cars[i]:
+                    self.cars[i].draw(surface)
+
+        font = pg.font.Font(c.FONT_PATH, 40)
+        font.bold = True
+        text = font.render(str(self.level_num), True, c.YELLOWGREEN)
+        text_rect = text.get_rect()
+        text_rect.x = 105
+        text_rect.y = 18
+        surface.blit(text, text_rect)
