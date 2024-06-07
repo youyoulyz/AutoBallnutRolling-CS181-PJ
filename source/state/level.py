@@ -876,12 +876,30 @@ class Level(tool.State):
         self.checkGameState()
         # do return zombie position
         self.getZombiesPositions()
+
+        #print(self.getNearestZombieGridsForEachRow())
         
         # do collision calculation
         # self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
-        
+    
+    def getNearestZombieGridsForEachRow(self)-> list[int,int,int,int,int]:
+        zombie_list=[]
+        for i in range(0, self.map_y_len):
+            pos_x_grid=1008600
+            for zombie in self.zombie_groups[i]:
+                if zombie.state == c.DIE:
+                    continue
+                if zombie.rect.x < pos_x_grid:
+                    pos_x_grid = zombie.rect.x
+            if pos_x_grid!= 1008600:
+                zombie_list.append(self.map.getMapIndex(pos_x_grid,100)[0])
+            else:
+                zombie_list.append(-1)
+        return zombie_list
+
+
     #add:获取卡组
     def cardlist_to_tuple(self)->tuple:
         cardlist = self.menubar.card_list
