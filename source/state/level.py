@@ -40,6 +40,7 @@ class Level(tool.State):
         #self.level_info = level_info()
         self.qlearning_action = None
         self.prediction_result = 0
+        
         #add:局数计数器
         self.level_num += 1
         self.win_num = 0
@@ -937,20 +938,22 @@ class Level(tool.State):
             #print("reward: ",reward, "prediction: ",10*prediction)
         return reward
     
-    #add:执行动作,并对当前动作预测
+    #add:执行动作,并对当前动作预测，返回预测值
     def do_action(self):
         current_cards = self.cardlist_to_tuple()
-        self.qlearning_action = self.bowlingAgent.get_action(current_cards)
+        self.qlearning_action = self.bowlingAgent.get_action(current_cards) #保存当前决策做的动作
         #print(self.qlearning_action)
         if self.qlearning_action == None:
             return 0
-        self.addPlantByMe(self.qlearning_action[0], self.qlearning_action[1], self.qlearning_action[2])
+        
         plant_type = self.qlearning_action[2]
         y = self.qlearning_action[1]
         x = self.qlearning_action[0]
+        self.addPlantByMe(x, y, plant_type)#x,y是格子数
+        
         predict_hit = 0 #预计碰撞次数
         min_zom_x = 10000
-        target_zom = [0]
+        target_zom = [0]#tip:用来存找到的最近僵尸的指针
         for zombie in self.zombie_groups[y]:
             if zombie.rect.x < min_zom_x and (zombie.rect.x - c.MAP_OFFSET_X)//c.GRID_X_SIZE >= x and zombie.set_to_die != 0:
                 min_zom_x = zombie.rect.x
