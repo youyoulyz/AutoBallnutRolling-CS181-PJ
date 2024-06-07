@@ -1019,28 +1019,30 @@ class Level(tool.State):
     #add:预测函数 
     def prediction(self, xx_1, yy_1, flag_up, flag_down):
         prediction = 0
+        # covert xx_1 yy_1 to grid pos
+        xx_1,yy_1 = self.map.getMapGridPos(xx_1, yy_1)
         while(xx_1 <= c.SCREEN_WIDTH + 25):
             xx_1 += c.GRID_X_SIZE
             if yy_1 < 0:
-                yy_1 = 1
+                _,yy_1 = self.map.getMapGridPos(1,1)
                 flag_down = 1
                 flag_up = 0
-            elif yy_1 > 4:
-                yy_1 = 3
+            elif yy_1 > c.GRID_Y_SIZE* c.GRID_Y_LEN:
+                _,yy_1 = self.map.getMapGridPos(1,4)
                 flag_down = 0
                 flag_up = 1
             
-            
-            for z in self.zombie_groups[yy_1]:
+            _,yy_index_1 = self.map.getMapIndex(100,yy_1)
+            for z in self.zombie_groups[yy_index_1]:
                 if abs(z.rect.x - xx_1) < c.GRID_X_SIZE/2 and z.set_to_die != 0:
                     z.set_to_die -= 1
                     prediction += 1
                     break
             
             if flag_down:
-                yy_1 += 1
+                _,yy_1 =self.map.getMapGridPos(1, yy_1+1)
             elif flag_up:
-                yy_1 -= 1
+                _,yy_1 =self.map.getMapGridPos(1, yy_1-1)
         return prediction
 
     def createZombie(self, name, map_y=None):
