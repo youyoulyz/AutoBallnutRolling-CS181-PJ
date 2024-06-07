@@ -55,9 +55,8 @@ class bowling_agent():
     def update(self, state:tuple, action:tuple, next_state:tuple, reward:float):
         current_q = self.get_qvalue(state, action)
         #print(state)
-        #print(self.qvalue[state])
         self.qvalue[state][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_value_from_qvalue(next_state))
-    
+        #print(self.qvalue[state])
     
     #add: 获取合法动作
     def get_legal_actions(self, state:tuple)->list:

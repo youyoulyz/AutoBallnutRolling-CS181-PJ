@@ -395,6 +395,7 @@ class Level(tool.State):
             self.draw(surface)
 
 
+
     def gameTime(self, current_time):
         # 扣除暂停时间
         if not self.pause:
@@ -2111,7 +2112,7 @@ class Level(tool.State):
                     surface.blit(self.huge_wave_approching_image,
                                  self.huge_wave_approching_image_rect)
                     
-            # draw the cnt
+             # draw the cnt
             font = pg.font.Font(c.FONT_PATH, 40)
             font.bold = True
             text = font.render(str(self.level_num), True, c.YELLOWGREEN)
@@ -2135,3 +2136,5 @@ class Level(tool.State):
         text_rect.x = 105
         text_rect.y = 18
         surface.blit(text, text_rect)
+            
+
