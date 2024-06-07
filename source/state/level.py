@@ -64,8 +64,8 @@ class Level(tool.State):
         self.initState()
 
         #初始化预测变量
-        self.predict_cnt=0
         self.collision_count=0
+        self.predict_cnt = 0
         
         
 
@@ -881,7 +881,7 @@ class Level(tool.State):
         #print(self.getNearestZombieGridsForEachRow())
         
         # do collision calculation
-        # self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
+        self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
     
@@ -911,16 +911,21 @@ class Level(tool.State):
                 num_bowling += 1
             elif card.plant_name == c.REDWALLNUTBOWLING:
                 num_boom += 1
-        return (num_bowling, num_boom)
+        zombie_list = self.getNearestZombieGridsForEachRow()
+        return (num_bowling, num_boom, zombie_list[0], zombie_list[1], zombie_list[2], zombie_list[3], zombie_list[4])
         
     #add:奖励函数reward
+    #add:加入当前动作造成的collision数目
     def get_reward(self, prediction, old_car):
         reward = 0
+        #拖时间
         if not self.checkLose():
             reward += 1
+        #输了扣大分    
         elif self.checkLose():
             reward = -10000
             return reward
+        #赢了按照小车数目给reward，丢车太多与输无异
         elif self.checkVictory():
             if len(self.cars) == 5:
                 return 10000
@@ -935,9 +940,15 @@ class Level(tool.State):
             if len(self.cars) == 0:
                 return -10000
             return reward
+        
+        #根据当前动作的prediction加分
         reward += 10*prediction
+        
+        #小车数量减少了扣分
         if len(self.cars) < old_car:
             reward -= 1000
+            
+        #僵尸位置扣分
         threat = 0
         zombies_list = self.getZombiesPositions()
         if len(zombies_list)>0:
@@ -951,7 +962,14 @@ class Level(tool.State):
             elif(zombie[0] == c.BUCKETHEAD_ZOMBIE):
                 threat -= 120/(zombie[3]+1e-5) 
         reward += 0.1*threat/(len(zombies_list)+1e-5)
+        
+        #屯卡加分
         reward += 2*len(self.menubar.card_list)
+        
+        #当前frame碰撞加分
+        current_collison = self.calculatePlantCollisions()
+        self.collision_count += current_collison
+        #reward += current_collison
         #if prediction > 0:
             #print("reward: ",reward, "prediction: ",10*prediction)
         return reward
@@ -977,18 +995,20 @@ class Level(tool.State):
                 min_zom_x = zombie.rect.x
                 target_zom[0] = zombie
         if min_zom_x >= 10000:
-            return -10
-        
+            return -1000
+        printout_x,_ = self.map.getMapIndex(min_zom_x,1)
+        #printout_x,_ = self.map.getMapIndex(830,1)
+        print("min_zom_x: ", printout_x)
         if plant_type == 0:
             #fix:第一次碰撞没算上
             target_zom[0].set_to_die -= 1
             predict_hit += 1
             if y == 0:
-                predict_hit += self.prediction(x, 1, 0, 1)
+                predict_hit += self.prediction(min_zom_x, 0, 0, 1)
             elif y == 4:
-                predict_hit += self.prediction(x, 3, 1, 0)
+                predict_hit += self.prediction(min_zom_x, 4, 1, 0)
             else:
-                predict_hit += 0.5*self.prediction(x, y-1, 1, 0) + 0.5*self.prediction(x, y+1, 0, 1)
+                predict_hit += 0.5*self.prediction(min_zom_x, y, 1, 0) + 0.5*self.prediction(min_zom_x, y, 0, 1)
                 
         elif plant_type == 1:
             zom_grid_x = (min_zom_x-c.MAP_OFFSET_X) // c.GRID_X_SIZE
@@ -1013,36 +1033,39 @@ class Level(tool.State):
                         if abs(victim_grid_x - zom_grid_x) <= 1 and z.set_to_die != 0:
                             predict_hit += z.set_to_die
                             z.set_to_die = 0
-
+        print("predicted hit:", predict_hit)
         return predict_hit
             
     #add:预测函数 
-    def prediction(self, xx_1, yy_1, flag_up, flag_down):
+    def prediction(self, xx_1, yy_1, flag_up, flag_down): #xx_1:撞到首个zombie的x坐标；yy_1行数
         prediction = 0
         # covert xx_1 yy_1 to grid pos
-        xx_1,yy_1 = self.map.getMapGridPos(xx_1, yy_1)
-        while(xx_1 <= c.SCREEN_WIDTH + 25):
-            xx_1 += c.GRID_X_SIZE
+        xx_1,_ = self.map.getMapIndex(xx_1, 1) #xx_1转化格子数
+        while(xx_1 <= 9):
+            
+            if flag_down:
+                yy_1 += 1
+            elif flag_up:
+               yy_1 -= 1
+                
             if yy_1 < 0:
-                _,yy_1 = self.map.getMapGridPos(1,1)
+                yy_1 = 1
                 flag_down = 1
                 flag_up = 0
-            elif yy_1 > c.GRID_Y_SIZE* c.GRID_Y_LEN:
-                _,yy_1 = self.map.getMapGridPos(1,4)
+            elif yy_1 > 4:
+                yy_1 = 3
                 flag_down = 0
                 flag_up = 1
             
-            _,yy_index_1 = self.map.getMapIndex(100,yy_1)
-            for z in self.zombie_groups[yy_index_1]:
-                if abs(z.rect.x - xx_1) < c.GRID_X_SIZE/2 and z.set_to_die != 0:
+            for z in self.zombie_groups[yy_1]:
+                z_index,_ = self.map.getMapIndex(z.rect.x, 1)
+                if z_index == xx_1 and z.set_to_die != 0:
                     z.set_to_die -= 1
                     prediction += 1
                     break
             
-            if flag_down:
-                _,yy_1 =self.map.getMapGridPos(1, yy_1+1)
-            elif flag_up:
-                _,yy_1 =self.map.getMapGridPos(1, yy_1-1)
+            xx_1 += 1
+            
         return prediction
 
     def createZombie(self, name, map_y=None):

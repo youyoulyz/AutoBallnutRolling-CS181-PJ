@@ -17,13 +17,15 @@ class bowling_agent():
         self.alpha = 0.5 #学习率
         self.qvalue = Counter()
         #add:重塑状态空间，只关注卡牌数目
-        for i in range(11):
+        """ for i in range(11):
             for j in range(i+1):
-                self.qvalue[(j, i - j)] = Counter() #前普通，后爆炸
+                self.qvalue[(j, i - j)] = Counter() """ #前普通，后爆炸
         #print(self.qvalue.keys())
         
     
-    def get_qvalue(self, card_num:tuple, action:tuple):
+    def get_qvalue(self, card_num:tuple, action:tuple): #状态（暂名card_num，包含：坚果数，爆炸数，五行最近僵尸格子
+        if card_num not in self.qvalue.keys():
+            self.qvalue[card_num] = Counter()
         return self.qvalue[card_num][action]
     
     def get_value_from_qvalue(self, card_num: tuple):
