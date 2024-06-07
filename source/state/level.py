@@ -388,11 +388,8 @@ class Level(tool.State):
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
             
-        #self.draw(surface)
-        if self.level_num< LOOP_NUM-10:
-            self.drawSimplified(surface)
-        else:
-            self.draw(surface)
+        self.draw(surface)
+
 
 
     def gameTime(self, current_time):
@@ -2111,27 +2108,6 @@ class Level(tool.State):
                     surface.blit(self.huge_wave_approching_image,
                                  self.huge_wave_approching_image_rect)
                     
-            # draw the cnt
-            font = pg.font.Font(c.FONT_PATH, 40)
-            font.bold = True
-            text = font.render(str(self.level_num), True, c.YELLOWGREEN)
-            text_rect = text.get_rect()
-            text_rect.x = 105
-            text_rect.y = 18
-            surface.blit(text, text_rect)
-            
-    def drawSimplified(self, surface):
-        self.level.blit(self.background, self.viewport, self.viewport)
-        surface.blit(self.level, (0, 0), self.viewport)
-        if self.state==c.PLAY:
-            for i in range(self.map_y_len):
-                if self.cars[i]:
-                    self.cars[i].draw(surface)
 
-        font = pg.font.Font(c.FONT_PATH, 40)
-        font.bold = True
-        text = font.render(str(self.level_num), True, c.YELLOWGREEN)
-        text_rect = text.get_rect()
-        text_rect.x = 105
-        text_rect.y = 18
-        surface.blit(text, text_rect)
+            
+
