@@ -388,11 +388,11 @@ class Level(tool.State):
         elif self.state == c.PLAY:
             self.play(mouse_pos, mouse_click)
             
-        #self.draw(surface)
-        if self.level_num< LOOP_NUM-10:
+        self.draw(surface)
+        """ if self.level_num< LOOP_NUM-10:
             self.drawSimplified(surface)
         else:
-            self.draw(surface)
+            self.draw(surface) """
 
 
 
@@ -956,21 +956,21 @@ class Level(tool.State):
         #输了扣分    
         elif self.checkLose():
             reward = -500
-            return reward
+            return reward+self.collision_count
         #赢了按照小车数目给reward，丢车太多与输无异
         elif self.checkVictory():
             if len(self.cars) == 5:
-                return 500
+                return 10+self.collision_count
             if len(self.cars) == 4:
-                return 300
+                return -100+self.collision_count
             if len(self.cars) == 3:
-                return 100
+                return -200+self.collision_count
             if len(self.cars) == 2:
-                return -100
+                return -400+self.collision_count
             if len(self.cars) == 1:
-                return -300
+                return -600+self.collision_count
             if len(self.cars) == 0:
-                return -500
+                return -1000+self.collision_count
             return reward
         
         #根据当前动作的prediction加分
@@ -1030,9 +1030,9 @@ class Level(tool.State):
                 target_zom[0] = zombie
         if min_zom_x >= 10000:
             if(plant_type == 0):
-                return -2
+                return -50
             elif(plant_type == 1):
-                return -10
+                return -100
         printout_x,_ = self.map.getMapIndex(min_zom_x,1)
         #printout_x,_ = self.map.getMapIndex(830,1)
         #print("min_zom_x: ", printout_x, "on the ", y+1, "th row")
@@ -1370,7 +1370,7 @@ class Level(tool.State):
     #add:agent延时决策
     def agent_make_decision(self, current_state):
         self.predict_cnt+=1
-        if(self.predict_cnt<30):
+        if(self.predict_cnt<50):
             return False
         self.predict_cnt=0
         self.prediction_result = self.do_action()

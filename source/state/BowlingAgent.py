@@ -44,6 +44,8 @@ class bowling_agent():
             if r < self.eps:  random_choose = 1
             else: random_choose = 0
             if random_choose:
+                #add:随机采取动作时，加入None
+                actions.append(None)
                 action = random.choice(actions)
             else:
                 action = self.compute_action_from_q(state)
@@ -54,14 +56,14 @@ class bowling_agent():
         
     def update(self, state:tuple, action:tuple, next_state:tuple, reward:float):
         current_q = self.get_qvalue(state, action)
-        #print(state)
         self.qvalue[state][action] = (1 - self.alpha) * current_q + self.alpha * (reward + self.gamma * self.get_value_from_qvalue(next_state))
         #print(self.qvalue[state])
     
     #add: 获取合法动作
     def get_legal_actions(self, state:tuple)->list:
         actions = []
-        actions.append(None)
+        #fix:取消直接定义的null action
+       #actions.append(None)
             
         for x in range(3):
             for y in range(5):
@@ -114,7 +116,7 @@ class Counter(dict):
     """
 
     def __getitem__(self, idx):
-        self.setdefault(idx, -10)
+        self.setdefault(idx, 0)
         return dict.__getitem__(self, idx)
 
     def incrementAll(self, keys, count):
