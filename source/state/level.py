@@ -49,8 +49,8 @@ class Level(tool.State):
         print("the ", self.level_num, " th round start")
         
         #add:实时调整探索率
-        self.bowlingAgent.eps = (0.01**(1/LOOP_NUM))**self.level_num
-        print("eps: ", self.bowlingAgent.eps)
+        """ self.bowlingAgent.eps = (0.01**(1/LOOP_NUM))**self.level_num
+        print("eps: ", self.bowlingAgent.eps) """
 
         # 暂停状态
         self.pause = False
@@ -1004,8 +1004,9 @@ class Level(tool.State):
         current_collison = self.calculatePlantCollisions()
         self.collision_count += current_collison
         #reward += current_collison
-        #if prediction > 0:
-            #print("reward: ",reward, "prediction: ",10*prediction)
+        """ if prediction > 0:
+            print("reward: ",reward, "prediction: ",10*prediction)
+            print(" ") """
         return reward
     
     #add:执行动作,并对当前动作预测，返回预测值
@@ -1045,7 +1046,7 @@ class Level(tool.State):
             elif y == 4:
                 predict_hit += self.prediction(min_zom_x, 4, 1, 0)
             else:
-                predict_hit += 0.5*self.prediction(min_zom_x, y, 1, 0) + 0.5*self.prediction(min_zom_x, y, 0, 1)
+                predict_hit += self.prediction(min_zom_x, y, 1, 0) + self.prediction(min_zom_x, y, 0, 1)
                 
         elif plant_type == 1:
             zom_grid_x = (min_zom_x-c.MAP_OFFSET_X) // c.GRID_X_SIZE
@@ -1099,6 +1100,9 @@ class Level(tool.State):
                 if z_index == xx_1 and z.set_to_die != 0:
                     z.set_to_die -= 1
                     prediction += 1
+                    flag_up = -flag_up
+                    flag_down = -flag_down
+                    xx_1 -= 1
                     break
             
             xx_1 += 1

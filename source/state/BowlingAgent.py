@@ -12,9 +12,9 @@ import numpy
 class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
-        self.eps = 1 #探索率
+        self.eps = 0.4 #探索率
         self.gamma = 0.8 #衰减率
-        self.alpha = 0.5 #学习率
+        self.alpha = 1 #学习率
         self.qvalue = Counter()
     
     def get_qvalue(self, state:tuple, action:tuple): #状态 包含：坚果数，爆炸数，每个格子的僵尸血量
@@ -63,8 +63,7 @@ class bowling_agent():
     def get_legal_actions(self, state:tuple)->list:
         actions = []
         #fix:取消直接定义的null action
-       #actions.append(None)
-            
+        actions.append(None)
         for x in range(3):
             for y in range(5):
                 if state[0] != 0:
@@ -72,6 +71,10 @@ class bowling_agent():
                 if state[1] != 0:
                     actions.append((x, y, 1))
         return actions
+    
+""" class ApproximateBowlingAgent(bowling_agent):
+    def __init__(): """
+        
         
 #说明：引用自hw5       
 class Counter(dict):
