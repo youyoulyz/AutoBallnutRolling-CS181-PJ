@@ -129,15 +129,15 @@ class Menu(tool.State):
         self.persist[c.GAME_MODE] = c.MODE_ADVENTURE
         # 播放进入音效
         pg.mixer.music.stop()
-        c.SOUND_EVILLAUGH.play()
-        c.SOUND_LOSE.play()
+        #c.SOUND_EVILLAUGH.play()
+        #c.SOUND_LOSE.play()
 
     # 按到小游戏
     def respondLittleGameClick(self):
         self.done = True
         self.persist[c.GAME_MODE] = c.MODE_LITTLEGAME
         # 播放点击音效
-        c.SOUND_BUTTON_CLICK.play()
+        #c.SOUND_BUTTON_CLICK.play()
 
     # 点击到退出按钮，修改转态的done属性
     def respondExitClick(self):
@@ -230,7 +230,7 @@ class Menu(tool.State):
     def respondOptionButtonClick(self):
         self.option_button_clicked = True
         # 播放点击音效
-        c.SOUND_BUTTON_CLICK.play()
+        #c.SOUND_BUTTON_CLICK.play()
 
     def showCurrentVolumeImage(self, surface:pg.Surface):
         # 由于音量可变，因此这一内容不能在一开始就结束加载，而应当不断刷新不断显示
@@ -273,7 +273,7 @@ class Menu(tool.State):
                 # 返回
                 if self.inArea(self.return_button_rect, *mouse_pos):
                     self.option_button_clicked = False
-                    c.SOUND_BUTTON_CLICK.play()
+                    #c.SOUND_BUTTON_CLICK.play()
                 # 音量+
                 elif self.inArea(self.sound_volume_plus_button_rect, *mouse_pos):
                     self.game_info[c.SOUND_VOLUME] = round(min(self.game_info[c.SOUND_VOLUME] + 0.05, 1), 2)
@@ -281,7 +281,7 @@ class Menu(tool.State):
                     pg.mixer.music.set_volume(self.game_info[c.SOUND_VOLUME])
                     for i in c.SOUNDS:
                         i.set_volume(self.game_info[c.SOUND_VOLUME])
-                    c.SOUND_BUTTON_CLICK.play()
+                    #c.SOUND_BUTTON_CLICK.play()
                     self.saveUserData()
                 # 音量-
                 elif self.inArea(self.sound_volume_minus_button_rect, *mouse_pos):
@@ -290,7 +290,7 @@ class Menu(tool.State):
                     pg.mixer.music.set_volume(self.game_info[c.SOUND_VOLUME])
                     for i in c.SOUNDS:
                         i.set_volume(self.game_info[c.SOUND_VOLUME])
-                    c.SOUND_BUTTON_CLICK.play()
+                    #c.SOUND_BUTTON_CLICK.play()
                     self.saveUserData()
         # 没有点到前两者时常规行检测所有按钮的点击和高亮
         else:

@@ -225,7 +225,7 @@ class HelpScreen(tool.State):
         self.setupImage()
         pg.display.set_caption("pypvz: 帮助")
         pg.mixer.music.stop()
-        c.SOUND_HELP_SCREEN.play()
+        #c.SOUND_HELP_SCREEN.play()
 
     def setupImage(self):
         # 主体

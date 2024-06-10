@@ -274,7 +274,7 @@ class Level(tool.State):
                             self.new_grave_added = True
                 # 从墓碑中生成僵尸
                 if not self.grave_zombie_created:
-                    if current_time - self.wave_time > 1500:
+                    if current_time - self.wave_time > 75: #default 1500
                         for item in self.grave_set:
                             item_x, item_y = self.map.getMapGridPos(*item)
                             # 目前设定：1/2概率普通僵尸，1/2概率路障僵尸
@@ -287,7 +287,7 @@ class Level(tool.State):
                         self.grave_zombie_created = True
             elif self.map_data[c.BACKGROUND_TYPE] in c.POOL_EQUIPPED_BACKGROUNDS:
                 if not self.created_zombie_from_pool:
-                    if current_time - self.wave_time > 1500:
+                    if current_time - self.wave_time > 75: #default 1500
                         for i in range(3):
                             # 水中倒数四列内可以在此时产生僵尸。共产生3个
                             map_x, map_y = random.randint(
@@ -315,50 +315,54 @@ class Level(tool.State):
                 self.wave_time = current_time
             else:
                 if (survival_rounds == 0) and (self.bar_type == c.CHOOSEBAR_STATIC):  # 首次选卡等待时间较长
-                    if current_time - self.wave_time >= 18000:
+                    if current_time - self.wave_time >= 900: # 18000:
                         self.wave_num += 1
                         self.wave_time = current_time
                         self.wave_zombies = self.waves[self.wave_num - 1]
                         self.zombie_num = len(self.wave_zombies)
-                        c.SOUND_ZOMBIE_COMING.play()
+                        #c.SOUND_ZOMBIE_COMING.play()
                 else:
-                    if (current_time - self.wave_time >= 6000):
+                    if (current_time - self.wave_time >= 300) :# 6000):
                         self.wave_num += 1
                         self.wave_time = current_time
                         self.wave_zombies = self.waves[self.wave_num - 1]
                         self.zombie_num = len(self.wave_zombies)
-                        c.SOUND_ZOMBIE_COMING.play()
+                        #c.SOUND_ZOMBIE_COMING.play()
             return
         if (self.wave_num % 10 != 9):
-            if ((current_time - self.wave_time >= 25000 + random.randint(0, 6000)) or (self.bar_type == c.CHOOSEBAR_BOWLING and current_time - self.wave_time >= 12500 + random.randint(0, 3000))):
+            # if ((current_time - self.wave_time >= 25000 + random.randint(0, 6000)) or (self.bar_type == c.CHOOSEBAR_BOWLING and current_time - self.wave_time >= 12500 + random.randint(0, 3000))):
+            if ((current_time - self.wave_time >= 1250 + random.randint(0, 300)) or (self.bar_type == c.CHOOSEBAR_BOWLING and current_time - self.wave_time >= 625 + random.randint(0, 150))):
                 self.wave_num += 1
                 self.wave_time = current_time
                 self.wave_zombies = self.waves[self.wave_num - 1]
                 self.zombie_num = len(self.wave_zombies)
-                c.SOUND_ZOMBIE_VOICE.play()
+                #c.SOUND_ZOMBIE_VOICE.play()
         else:
-            if ((current_time - self.wave_time >= 45000) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 25000)):
+            # if ((current_time - self.wave_time >= 45000) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 25000)):
+            if ((current_time - self.wave_time >= 2250) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 1250)):
                 self.wave_num += 1
                 self.wave_time = current_time
                 self.wave_zombies = self.waves[self.wave_num - 1]
                 self.zombie_num = len(self.wave_zombies)
                 # 一大波时播放音效
-                c.SOUND_HUGE_WAVE_APPROCHING.play()
+                #c.SOUND_HUGE_WAVE_APPROCHING.play()
                 return
-            elif ((current_time - self.wave_time >= 43000) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 23000)):
+            elif ((current_time - self.wave_time >= 2150) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 1150)):
+            # elif ((current_time - self.wave_time >= 43000) or (self.bar_type != c.CHOOSEBAR_STATIC and current_time - self.wave_time >= 23000)):
                 self.show_hugewave_approching_time = current_time
 
         zombie_nums = 0
         for i in range(self.map_y_len):
             zombie_nums += len(self.zombie_groups[i])
-        if self.zombie_num and (zombie_nums / self.zombie_num < random.uniform(0.15, 0.25)) and (current_time - self.wave_time > 4000):
+        if self.zombie_num and (zombie_nums / self.zombie_num < random.uniform(0.15, 0.25)) and (current_time - self.wave_time > 200):
+        # if self.zombie_num and (zombie_nums / self.zombie_num < random.uniform(0.15, 0.25)) and (current_time - self.wave_time > 4000):
             # 当僵尸所剩无几并且时间过了4000 ms以上时，改变时间记录，使得2000 ms后刷新僵尸（所以需要判断剩余时间是否大于2000 ms）
             if self.bar_type == c.CHOOSEBAR_STATIC:
-                if current_time - 43000 < self.wave_time:    # 判断剩余时间是否有2000 ms
-                    self.wave_time = current_time - 43000    # 即倒计时2000 ms
+                if current_time - 2150 < self.wave_time:    # 判断剩余时间是否有2000 ms
+                    self.wave_time = current_time - 2150    # 即倒计时2000 ms
             else:
-                if current_time - 23000 < self.wave_time:    # 判断剩余时间是否有2000 ms
-                    self.wave_time = current_time - 23000    # 即倒计时2000 ms
+                if current_time - 1150 < self.wave_time:    # 判断剩余时间是否有2000 ms
+                    self.wave_time = current_time - 1150    # 即倒计时2000 ms
 
     # 旧机制，目前仅用于调试
 
@@ -398,6 +402,7 @@ class Level(tool.State):
 
 
     def gameTime(self, current_time):
+        return current_time
         # 扣除暂停时间
         if not self.pause:
             self.before_pause_time = current_time - self.pause_time
@@ -454,7 +459,7 @@ class Level(tool.State):
                 self.initPlay(self.panel.getSelectedCards())
             elif self.inArea(self.little_menu_rect, *mouse_pos):
                 self.show_game_menu = True
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
 
     def initPlay(self, card_list):
 
@@ -647,13 +652,13 @@ class Level(tool.State):
                 # 继续播放音乐
                 pg.mixer.music.unpause()
                 # 播放点击音效
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
             # 重新开始键
             elif self.inArea(self.restart_button_rect, *mouse_pos):
                 self.done = True
                 self.next = c.LEVEL
                 # 播放点击音效
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
             # 主菜单键
             elif self.inArea(self.mainMenu_button_rect, *mouse_pos):
                 self.done = True
@@ -661,7 +666,7 @@ class Level(tool.State):
                 self.persist = self.game_info
                 self.persist[c.CURRENT_TIME] = 0
                 # 播放点击音效
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
             # 音量+
             elif self.inArea(self.sound_volume_plus_button_rect, *mouse_pos):
                 self.game_info[c.SOUND_VOLUME] = round(
@@ -670,7 +675,7 @@ class Level(tool.State):
                 pg.mixer.music.set_volume(self.game_info[c.SOUND_VOLUME])
                 for i in c.SOUNDS:
                     i.set_volume(self.game_info[c.SOUND_VOLUME])
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
                 # 将音量信息存档
                 self.saveUserData()
             elif self.inArea(self.sound_volume_minus_button_rect, *mouse_pos):
@@ -680,7 +685,7 @@ class Level(tool.State):
                 pg.mixer.music.set_volume(self.game_info[c.SOUND_VOLUME])
                 for i in c.SOUNDS:
                     i.set_volume(self.game_info[c.SOUND_VOLUME])
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
                 # 将音量信息存档
                 self.saveUserData()
 
@@ -817,7 +822,7 @@ class Level(tool.State):
                     self.menubar.increaseSunValue(sun.sun_value)
                     clicked_sun = True
                     # 播放收集阳光的音效
-                #    c.SOUND_COLLECT_SUN.play()
+                #    #c.SOUND_COLLECT_SUN.play()
                 self.sun_group.remove(sun)
 
         # 拖动植物或者铲子
@@ -830,7 +835,7 @@ class Level(tool.State):
                 self.click_result[1].clicked = True
                 clicked_cards_or_map = True
                 # 播放音效
-                c.SOUND_CLICK_CARD.play()
+                #c.SOUND_CLICK_CARD.play()
         elif self.drag_plant:
             if mouse_click[1]:
                 self.removeMouseImage()
@@ -854,14 +859,14 @@ class Level(tool.State):
                 # 暂停 显示菜单
                 self.show_game_menu = True
                 # 播放点击音效
-                c.SOUND_BUTTON_CLICK.play()
+                #c.SOUND_BUTTON_CLICK.play()
             elif self.has_shovel:
                 if self.inArea(self.shovel_box_rect, *mouse_pos):
                     self.drag_shovel = not self.drag_shovel
                     if not self.drag_shovel:
                         self.removeMouseImagePlus()
                     # 播放点击铲子的音效
-                    c.SOUND_SHOVEL.play()
+                    #c.SOUND_SHOVEL.play()
                 elif self.drag_shovel:
                     # 移出这地方的植物
                     self.shovelRemovePlant(mouse_pos)
@@ -1314,7 +1319,7 @@ class Level(tool.State):
         # print(self.new_plant_and_positon)
 
         # 播放种植音效
-        c.SOUND_PLANT.play()
+        #c.SOUND_PLANT.play()
         #self.addPlantByMe()
         
     # 在 x,y位置上种植0,1两种植物，并消耗对应的传送带卡片
@@ -1562,7 +1567,7 @@ class Level(tool.State):
                     if zombie.name in {c.POLE_VAULTING_ZOMBIE} and (not zombie.jumped):
                         if target_plant.name == c.GIANTWALLNUT:
                             zombie.health = 0
-                            c.SOUND_BOWLING_IMPACT.play()
+                            #c.SOUND_BOWLING_IMPACT.play()
                         elif not zombie.jumping:
                             zombie.jump_map_x = min(
                                 self.map_x_len - 1, zombie.prey_map_x)
@@ -1591,7 +1596,7 @@ class Level(tool.State):
                                     c.WALLNUT_BOWLING_DAMAGE, damage_type=c.ZOMBIE_WALLNUT_BOWLING_DANMAGE)
                             target_plant.changeDirection(i)
                             # 播放撞击音效
-                            c.SOUND_BOWLING_IMPACT.play()
+                            #c.SOUND_BOWLING_IMPACT.play()
                             #print("Crashed by BOWLING")
                             target_plant.addCrashCnt()
                     elif target_plant.name == c.REDWALLNUTBOWLING:
@@ -1600,7 +1605,7 @@ class Level(tool.State):
                             #print("Crashed by BOWLINGBOMB")
                     elif target_plant.name == c.GIANTWALLNUT:
                         zombie.health = 0
-                        c.SOUND_BOWLING_IMPACT.play()
+                        #c.SOUND_BOWLING_IMPACT.play()
                     elif zombie.target_y_change:
                         # 大蒜作用正在生效的僵尸不进行传递
                         continue
@@ -1708,7 +1713,7 @@ class Level(tool.State):
 
     def freezeZombies(self, plant):
         # 播放冻结音效
-        c.SOUND_FREEZE.play()
+        #c.SOUND_FREEZE.play()
 
         for i in range(self.map_y_len):
             for zombie in self.zombie_groups[i]:
@@ -1740,11 +1745,13 @@ class Level(tool.State):
                     self.plant_groups[map_y].add(plant.Hole(
                         target_plant.original_x, target_plant.original_y, self.map.map[map_y][map_x][c.MAP_PLOT_TYPE]))
             elif target_plant.name not in c.PLANT_DIE_SOUND_EXCEPTIONS:
+                None
                 # 触发植物死亡音效
-                c.SOUND_PLANT_DIE.play()
+                #c.SOUND_PLANT_DIE.play()
         else:
+            None
             # 用铲子移除植物时播放音效
-            c.SOUND_PLANT.play()
+            #c.SOUND_PLANT.play()
 
         # 整理地图信息
         if self.bar_type != c.CHOOSEBAR_BOWLING:
@@ -1930,12 +1937,12 @@ class Level(tool.State):
                     #self.next = c.AWARD_SCREEN
                     self.next = c.LEVEL
                     # 播放大胜利音效
-                    c.SOUND_FINAL_FANFARE.play()
+                    #c.SOUND_FINAL_FANFARE.play()
                 else:
                     #self.next = c.GAME_VICTORY
                     self.next = c.LEVEL
                     # 播放胜利音效
-                    c.SOUND_WIN.play()
+                    #c.SOUND_WIN.play()
             elif self.game_info[c.GAME_MODE] == c.MODE_LITTLEGAME:
                 # changed:游戏状态循环
                 #self.game_info[c.LITTLEGAME_NUM] += 1
@@ -1944,7 +1951,7 @@ class Level(tool.State):
                     self.game_info[c.LITTLEGAME_NUM] = 1
                     self.next = c.AWARD_SCREEN
                     # 播放大胜利音效
-                    c.SOUND_FINAL_FANFARE.play()
+                    #c.SOUND_FINAL_FANFARE.play()
                 else:
                     #add:到达预定次数停止
                     if self.level_num == LOOP_NUM:
@@ -1954,7 +1961,7 @@ class Level(tool.State):
                     else:
                         self.next = c.LEVEL
                     # 播放胜利音效
-                    c.SOUND_WIN.play()
+                    #c.SOUND_WIN.play()
             self.done = True
             print("the " ,self.level_num, " th round succeed")
             self.win_num += 1
@@ -1963,8 +1970,8 @@ class Level(tool.State):
             self.saveUserData()
         elif self.checkLose():
             # 播放失败音效
-            c.SOUND_LOSE.play()
-            c.SOUND_SCREAM.play()
+            #c.SOUND_LOSE.play()
+            #c.SOUND_SCREAM.play()
             #add:到达预定次数停止
             if self.level_num == LOOP_NUM:
                 self.next = c.GAME_LOSE
@@ -2118,13 +2125,13 @@ class Level(tool.State):
                                  self.huge_wave_approching_image_rect)
                     
              # draw the cnt
-            font = pg.font.Font(c.FONT_PATH, 40)
-            font.bold = True
-            text = font.render(str(self.level_num), True, c.YELLOWGREEN)
-            text_rect = text.get_rect()
-            text_rect.x = 105
-            text_rect.y = 18
-            surface.blit(text, text_rect)
+            # font = pg.font.Font(c.FONT_PATH, 40)
+            # font.bold = True
+            # text = font.render(str(self.current_time), True, c.YELLOWGREEN)
+            # text_rect = text.get_rect()
+            # text_rect.x = 105
+            # text_rect.y = 18
+            # surface.blit(text, text_rect)
             
     def drawSimplified(self, surface):
         self.level.blit(self.background, self.viewport, self.viewport)
@@ -2136,7 +2143,7 @@ class Level(tool.State):
 
         font = pg.font.Font(c.FONT_PATH, 40)
         font.bold = True
-        text = font.render(str(self.level_num), True, c.YELLOWGREEN)
+        text = font.render(str(self.current_time), True, c.YELLOWGREEN)
         text_rect = text.get_rect()
         text_rect.x = 105
         text_rect.y = 18

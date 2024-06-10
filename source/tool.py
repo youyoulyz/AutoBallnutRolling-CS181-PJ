@@ -109,7 +109,7 @@ class Control():
 
     def update(self):
         # 自 pygame_init() 调用以来的毫秒数 * 游戏速度倍率，即游戏时间
-        self.current_time = pg.time.get_ticks() * self.game_info[c.GAME_RATE]
+        self.current_time += 1
 
         if self.state.done:
             self.flip_state()
@@ -150,10 +150,13 @@ class Control():
 
     def run(self):
         while not self.done:
-            self.event_loop()
+            # self.event_loop()
             self.update()
-            pg.display.update()
-            self.clock.tick(self.fps)
+            # pg.display.update()
+            #这行拿来目力验证？？？？？？？
+            if self.state.level_num > 30:
+                pg.display.update()
+            # self.clock.tick(self.fps)
 
 def get_image(  sheet:pg.Surface, x:int, y:int, width:int, height:int,
                 colorkey:tuple[int]=c.BLACK, scale:int=1) -> pg.Surface:

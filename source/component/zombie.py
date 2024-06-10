@@ -52,12 +52,12 @@ class Zombie(pg.sprite.Sprite):
         self.animate_timer = 0
         self.attack_timer = 0
         self.state = c.WALK
-        self.animate_interval = 150
-        self.walk_animate_interval = 180
-        self.attack_animate_interval = 100
-        self.losthead_animate_interval = 180
-        self.die_animate_interval = 50
-        self.boomDie_animate_interval = 100
+        self.animate_interval = 7.5#150
+        self.walk_animate_interval = 9#180
+        self.attack_animate_interval = 5#100
+        self.losthead_animate_interval = 9#180
+        self.die_animate_interval = 1#50
+        self.boomDie_animate_interval = 5#100
         self.ice_slow_ratio = 1
         self.ice_slow_timer = 0
         self.hit_timer = 0
@@ -105,7 +105,7 @@ class Zombie(pg.sprite.Sprite):
                 self.setLostHead()
                 return True
             else:
-                self.health -= (self.current_time - self.losthead_timer) / 40
+                self.health -= (self.current_time - self.losthead_timer) / 2#40
                 self.losthead_timer = self.current_time
                 return False
         else:
@@ -127,7 +127,7 @@ class Zombie(pg.sprite.Sprite):
                         self.swimming = True
                         self.changeFrames(self.swim_frames)
                         # 播放入水音效
-                        c.SOUND_ZOMBIE_ENTERING_WATER.play()
+                        #c.SOUND_ZOMBIE_ENTERING_WATER.play()
                         # 同样没有兼容双防具
                         if self.helmet:
                             if self.helmet_health <= 0:
@@ -206,7 +206,7 @@ class Zombie(pg.sprite.Sprite):
                 self.changeFrames(self.walk_frames)
                 self.helmet_type2 = False
 
-        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL * self.getTimeRatio()):
+        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL ):
             self.handleGarlicYChange()
             self.walk_timer = self.current_time
             if self.is_hypno:
@@ -254,7 +254,7 @@ class Zombie(pg.sprite.Sprite):
             self.helmet_type2 = False
             if self.name == c.NEWSPAPER_ZOMBIE:
                 self.speed = 2.65
-                self.walk_animate_interval = 300
+                self.walk_animate_interval = 15#300
         if (((self.current_time - self.attack_timer) > (c.ATTACK_INTERVAL * self.getAttackTimeRatio()))
             and (not self.losthead)):
             if self.prey.health > 0:
@@ -266,7 +266,7 @@ class Zombie(pg.sprite.Sprite):
                     self.prey.setDamage(self.damage)
                 
                 # 播放啃咬音效
-                c.SOUND_ZOMBIE_ATTACKING.play()
+                #c.SOUND_ZOMBIE_ATTACKING.play()
             self.attack_timer = self.current_time
 
         if self.prey.health <= 0:
@@ -312,11 +312,15 @@ class Zombie(pg.sprite.Sprite):
         self.rect.centerx = centerx
 
     def animation(self):
+        if self.state == c.DIE:
+                    self.kill()
+                    return
+        return
         if self.state == c.FREEZE:
             self.image.set_alpha(192)
             return
 
-        if (self.current_time - self.animate_timer) > (self.animate_interval * self.getTimeRatio()):
+        if (self.current_time - self.animate_timer) > (self.animate_interval):
             self.frame_index += 1
             if self.frame_index >= self.frame_num:
                 if self.state == c.DIE:
@@ -329,7 +333,7 @@ class Zombie(pg.sprite.Sprite):
         if self.is_hypno:
             self.image = pg.transform.flip(self.image, True, False)
         self.mask = pg.mask.from_surface(self.image)
-        if (self.current_time - self.hit_timer) >= 200:
+        if (self.current_time - self.hit_timer) >= 10:#200:
             self.image.set_alpha(255)
         else:
             self.image.set_alpha(192)
@@ -343,7 +347,8 @@ class Zombie(pg.sprite.Sprite):
     def setIceSlow(self):
         # 在转入冰冻减速状态时播放冰冻音效
         if self.ice_slow_ratio == 1:
-            c.SOUND_FREEZE.play()
+            None
+            #c.SOUND_FREEZE.play()
 
         # when get a ice bullet damage, slow the attack or walk speed of the zombie
         self.ice_slow_timer = self.current_time
@@ -519,7 +524,7 @@ class Zombie(pg.sprite.Sprite):
         self.is_hypno = True
         self.setWalk()
         # 播放魅惑音效
-        c.SOUND_HYPNOED.play()
+        #c.SOUND_HYPNOED.play()
 
 
 class ZombieHead(Zombie):
@@ -534,7 +539,7 @@ class ZombieHead(Zombie):
         self.frames = self.die_frames
 
     def setWalk(self):
-        self.animate_interval = 100
+        self.animate_interval = 5#100
 
 
 class NormalZombie(Zombie):
@@ -722,8 +727,8 @@ class NewspaperZombie(Zombie):
             self.changeFrames(self.lostnewspaper_frames)
             self.helmet_type2 = False
             # 触发报纸撕裂音效
-            c.SOUND_NEWSPAPER_RIP.play()
-        if ((self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL * self.getTimeRatio())):
+            #c.SOUND_NEWSPAPER_RIP.play()
+        if ((self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL )):
             self.handleGarlicYChange()
             self.walk_timer = self.current_time
             if self.frames == self.lostnewspaper_frames:
@@ -738,7 +743,7 @@ class NewspaperZombie(Zombie):
             self.image.set_alpha(192)
             return
 
-        if (self.current_time - self.animate_timer) > (self.animate_interval * self.getTimeRatio()):
+        if (self.current_time - self.animate_timer) > (self.animate_interval ):
             self.frame_index += 1
             if self.frame_index >= self.frame_num:
                 if self.state == c.DIE:
@@ -750,7 +755,7 @@ class NewspaperZombie(Zombie):
                     self.speed = 2.65
                     self.walk_animate_interval = 300
                     # 触发报纸僵尸暴走音效
-                    c.SOUND_NEWSPAPER_ZOMBIE_ANGRY.play()
+                    #c.SOUND_NEWSPAPER_ZOMBIE_ANGRY.play()
                     return
                 self.frame_index = 0
             self.animate_timer = self.current_time
@@ -993,14 +998,14 @@ class PoleVaultingZombie(Zombie):
             self.successfullyJumped = successfullyJumped
             self.jump_x = jump_x
             # 播放跳跃音效
-            c.SOUND_POLEVAULT_JUMP.play()
+            #c.SOUND_POLEVAULT_JUMP.play()
 
     def animation(self):
         if self.state == c.FREEZE:
             self.image.set_alpha(192)
             return
 
-        if (self.current_time - self.animate_timer) > (self.animate_interval * self.getTimeRatio()):
+        if (self.current_time - self.animate_timer) > (self.animate_interval ):
             self.frame_index += 1
             if self.state == c.WALK:
                 if self.jumping and (not self.jumped):
@@ -1061,7 +1066,7 @@ class Zomboni(Zombie):
         self.die_animate_interval = 70
         self.boomDie_animate_interval = 150
         # 播放冰车生成音效
-        c.SOUND_ZOMBONI.play()
+        #c.SOUND_ZOMBONI.play()
 
     def loadImages(self):
         self.walk_frames = []
@@ -1106,7 +1111,7 @@ class Zomboni(Zombie):
         elif self.health <= c.ZOMBONI_DAMAGED1_HEALTH:
             self.changeFrames(self.walk_damaged1_frames)
 
-        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL * self.getTimeRatio()) and (not self.losthead):
+        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL ) and (not self.losthead):
             self.walk_timer = self.current_time
             if self.is_hypno:
                 self.rect.x += 1
@@ -1136,7 +1141,7 @@ class Zomboni(Zombie):
         self.animate_interval = self.die_animate_interval
         self.changeFrames(self.die_frames)
         # 播放冰车爆炸音效
-        c.SOUND_ZOMBONI_EXPLOSION.play()
+        #c.SOUND_ZOMBONI_EXPLOSION.play()
 
 
 class SnorkelZombie(Zombie):
@@ -1200,7 +1205,7 @@ class SnorkelZombie(Zombie):
                     self.changeFrames(self.jump_frames)
                     self.speed = 1.175
                     # 播放入水音效
-                    c.SOUND_ZOMBIE_ENTERING_WATER.play()
+                    #c.SOUND_ZOMBIE_ENTERING_WATER.play()
             # 已经接近家门口并且上岸
             else:
                 if self.swimming:
@@ -1213,7 +1218,7 @@ class SnorkelZombie(Zombie):
                 self.speed = 1.6
                 self.changeFrames(self.walk_frames)
             self.swimming = False
-        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL * self.getTimeRatio()):
+        if (self.current_time - self.walk_timer) > (c.ZOMBIE_WALK_INTERVAL ):
             self.handleGarlicYChange()
             self.walk_timer = self.current_time
             # 正在上浮或者下潜不用移动
@@ -1229,7 +1234,7 @@ class SnorkelZombie(Zombie):
             self.image.set_alpha(192)
             return
 
-        if (self.current_time - self.animate_timer) > (self.animate_interval * self.getTimeRatio()):
+        if (self.current_time - self.animate_timer) > (self.animate_interval ):
             self.frame_index += 1
             if self.frame_index >= self.frame_num:
                 if self.state == c.DIE:
