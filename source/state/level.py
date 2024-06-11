@@ -32,6 +32,10 @@ class Level(tool.State):
         self.bowlingAgent = bowling_agent()
         self.level_num = 0
         self.istest = 0
+        #fix: 总体观测变量要在最开始时初始化，否则一直被置零
+        self.win_num = 0
+        self.lose_num = 0
+        self.total_car = 0
 
     def startup(self, current_time, persist):
         self.game_info = persist
@@ -44,9 +48,7 @@ class Level(tool.State):
         
         #add:局数计数器
         self.level_num += 1
-        self.win_num = 0
-        self.lose_num = 0
-        self.total_car = 0
+        
         print("the ", self.level_num, " th round start")
         
         #add:实时调整探索率
