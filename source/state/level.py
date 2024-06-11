@@ -397,13 +397,13 @@ class Level(tool.State):
             self.play(mouse_pos, mouse_click)
             
         self.draw(surface)
-        if self.level_num >= 0.5*LOOP_NUM and self.level_num < 0.7*LOOP_NUM:
+        if self.level_num >= 0.5*(LOOP_NUM-TESTLOOP) and self.level_num < 0.7*(LOOP_NUM-TESTLOOP):
             self.bowlingAgent.eps = 0.5
-        elif self.level_num >= 0.7*LOOP_NUM and self.level_num < 0.9*LOOP_NUM:
+        elif self.level_num >= 0.7*(LOOP_NUM-TESTLOOP) and self.level_num < 0.9*(LOOP_NUM-TESTLOOP):
             self.bowlingAgent.eps = 0.3
-        elif self.level_num >= 0.9*LOOP_NUM and self.level_num < LOOP_NUM:
+        elif self.level_num >= 0.9*(LOOP_NUM-TESTLOOP) and self.level_num < (LOOP_NUM-TESTLOOP):
             self.bowlingAgent.eps = 0.05
-        elif self.level_num >= LOOP_NUM:
+        elif self.level_num >= (LOOP_NUM-TESTLOOP):
             self.bowlingAgent.eps = 0
         """ if self.level_num< LOOP_NUM-10:
             self.drawSimplified(surface)
