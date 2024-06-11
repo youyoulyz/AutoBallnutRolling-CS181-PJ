@@ -10,6 +10,7 @@ from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
 LOOP_NUM = 1010
+TESTLOOP = 10
 
 """ #add:state定义
 class level_info():
@@ -1979,8 +1980,9 @@ class Level(tool.State):
                     # 播放胜利音效
                     #c.SOUND_WIN.play()
                         self.done = True
-                        self.win_num += 1
-                        self.total_car += len(self.cars)
+                        if LOOP_NUM - self.level_num <= TESTLOOP:
+                            self.win_num += 1
+                            self.total_car += len(self.cars)
             print("the " ,self.level_num, " th round succeed")
             self.saveUserData()
         elif self.checkLose():
@@ -1995,8 +1997,9 @@ class Level(tool.State):
             else:
                 self.next = c.LEVEL
                 self.done = True
-                self.lose_num += 1
-                self.total_car += len(self.cars)
+                if LOOP_NUM - self.level_num <= TESTLOOP:
+                    self.lose_num += 1
+                    self.total_car += len(self.cars)
             print("the " ,self.level_num, " th round fail")
 
     def drawMouseShow(self, surface):
