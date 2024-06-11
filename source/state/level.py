@@ -397,13 +397,13 @@ class Level(tool.State):
             self.play(mouse_pos, mouse_click)
             
         self.draw(surface)
-        if self.level_num >= 0.5*(LOOP_NUM-TESTLOOP) and self.level_num < 0.7*(LOOP_NUM-TESTLOOP):
-            self.bowlingAgent.eps = 0.5
-        elif self.level_num >= 0.7*(LOOP_NUM-TESTLOOP) and self.level_num < 0.9*(LOOP_NUM-TESTLOOP):
-            self.bowlingAgent.eps = 0.3
-        elif self.level_num >= 0.9*(LOOP_NUM-TESTLOOP) and self.level_num < (LOOP_NUM-TESTLOOP):
-            self.bowlingAgent.eps = 0.05
-        elif self.level_num >= (LOOP_NUM-TESTLOOP):
+        # if self.level_num >= 0.5*(LOOP_NUM-TESTLOOP) and self.level_num < 0.7*(LOOP_NUM-TESTLOOP):
+        #     self.bowlingAgent.eps = 0.5
+        # elif self.level_num >= 0.7*(LOOP_NUM-TESTLOOP) and self.level_num < 0.9*(LOOP_NUM-TESTLOOP):
+        #     self.bowlingAgent.eps = 0.3
+        # elif self.level_num >= 0.9*(LOOP_NUM-TESTLOOP) and self.level_num < (LOOP_NUM-TESTLOOP):
+        #     self.bowlingAgent.eps = 0.05
+        if self.level_num >= (LOOP_NUM-TESTLOOP):
             self.bowlingAgent.eps = 0
         """ if self.level_num< LOOP_NUM-10:
             self.drawSimplified(surface)
@@ -1062,13 +1062,13 @@ class Level(tool.State):
         if plant_type == 0:
             #fix:第一次碰撞没算上
             target_zom[0].set_to_die -= 1
-            predict_hit += 1
-            if y == 0:
-                predict_hit += self.prediction(min_zom_x, 0, 0, 1)
-            elif y == 4:
-                predict_hit += self.prediction(min_zom_x, 4, 1, 0)
-            else:
-                predict_hit += self.prediction(min_zom_x, y, 1, 0) + self.prediction(min_zom_x, y, 0, 1)
+            predict_hit += 3
+            # if y == 0:
+            #     predict_hit += self.prediction(min_zom_x, 0, 0, 1)
+            # elif y == 4:
+            #     predict_hit += self.prediction(min_zom_x, 4, 1, 0)
+            # else:
+            #     predict_hit += self.prediction(min_zom_x, y, 1, 0) + self.prediction(min_zom_x, y, 0, 1)
                 
         elif plant_type == 1:
             zom_grid_x = (min_zom_x-c.MAP_OFFSET_X) // c.GRID_X_SIZE

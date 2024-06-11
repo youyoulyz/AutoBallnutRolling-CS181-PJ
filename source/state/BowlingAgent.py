@@ -12,7 +12,7 @@ import numpy
 class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
-        self.eps = 0.9 #探索率
+        self.eps = 0.3 #探索率
         self.gamma = 0.8 #衰减率
         self.alpha = 0.8 #学习率
         self.qvalue = Counter()
