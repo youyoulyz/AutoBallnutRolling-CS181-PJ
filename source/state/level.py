@@ -9,7 +9,7 @@ from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
-LOOP_NUM = 1000
+LOOP_NUM = 1010
 
 """ #add:state定义
 class level_info():
@@ -31,6 +31,7 @@ class Level(tool.State):
         #add: 初始化agent
         self.bowlingAgent = bowling_agent()
         self.level_num = 0
+        self.istest = 0
 
     def startup(self, current_time, persist):
         self.game_info = persist
@@ -393,6 +394,14 @@ class Level(tool.State):
             self.play(mouse_pos, mouse_click)
             
         self.draw(surface)
+        if self.level_num >= 500 and self.level_num < 700:
+            self.bowlingAgent.eps = 0.5
+        elif self.level_num >= 700 and self.level_num < 900:
+            self.bowlingAgent.eps = 0.3
+        elif self.level_num >= 900 and self.level_num < 1000:
+            self.bowlingAgent.eps = 0.05
+        elif self.level_num >= 1000:
+            self.bowlingAgent.eps = 0
         """ if self.level_num< LOOP_NUM-10:
             self.drawSimplified(surface)
         else:
@@ -904,6 +913,7 @@ class Level(tool.State):
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
         
+        
     #add：每个格子上是否存在僵尸（或改为僵尸总血量）
     def get_zombie_existance_on_each_grid(self)-> list[int,int,int,int,int]:
         zombie_list=[]
@@ -939,17 +949,21 @@ class Level(tool.State):
         return zombie_list
 
     #add:获取状态tuple
+    #fix:智能体仅需知道有没有卡，而非卡的数量
     def state_to_tuple(self)->tuple:
         cardlist = self.menubar.card_list
-        num_bowling = 0
-        num_boom = 0
+        have_bowling = 0
+        have_boom = 0
         for card in cardlist:
             if card.plant_name == c.WALLNUTBOWLING:
-                num_bowling += 1
+                have_bowling = 1
             elif card.plant_name == c.REDWALLNUTBOWLING:
-                num_boom += 1
-        zombie_list = self.get_zombie_existance_on_each_grid()
-        return (num_bowling, num_boom, tuple(zombie_list[0]), tuple(zombie_list[1]), tuple(zombie_list[2]), tuple(zombie_list[3]), tuple(zombie_list[4]))
+                have_boom = 1
+            if have_boom and have_bowling:
+                break
+        # zombie_list = self.get_zombie_existance_on_each_grid()
+        zombie_pos = self.getNearestZombieGridsForEachRow()
+        return (have_bowling, have_boom, tuple(zombie_pos))#, tuple(zombie_list[0]), tuple(zombie_list[1]), tuple(zombie_list[2]), tuple(zombie_list[3]), tuple(zombie_list[4]))
         
     #add:奖励函数reward
     #add:加入当前动作造成的collision数目
@@ -1955,18 +1969,17 @@ class Level(tool.State):
                 else:
                     #add:到达预定次数停止
                     if self.level_num == LOOP_NUM:
-                        self.next = c.GAME_VICTORY
-                        self.total_car /= 100
+                        self.total_car /= 10
                         print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
+                        self.next = c.GAME_VICTORY
                     else:
                         self.next = c.LEVEL
                     # 播放胜利音效
                     #c.SOUND_WIN.play()
-            self.done = True
+                        self.done = True
+                        self.win_num += 1
+                        self.total_car += len(self.cars)
             print("the " ,self.level_num, " th round succeed")
-            self.win_num += 1
-            self.total_car += len(self.cars)
-            
             self.saveUserData()
         elif self.checkLose():
             # 播放失败音效
@@ -1974,14 +1987,14 @@ class Level(tool.State):
             #c.SOUND_SCREAM.play()
             #add:到达预定次数停止
             if self.level_num == LOOP_NUM:
-                self.next = c.GAME_LOSE
-                self.total_car /= 100
+                self.total_car /= 10
                 print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
+                self.next = c.GAME_LOSE
             else:
                 self.next = c.LEVEL
-            self.done = True
-            self.lose_num += 1
-            self.total_car += len(self.cars)
+                self.done = True
+                self.lose_num += 1
+                self.total_car += len(self.cars)
             print("the " ,self.level_num, " th round fail")
 
     def drawMouseShow(self, surface):

@@ -154,7 +154,7 @@ class Control():
             self.update()
             # pg.display.update()
             #这行拿来目力验证？？？？？？？
-            if self.state.level_num > 30:
+            if self.state == c.LEVEL and  self.state.level_num > 1000:
                 pg.display.update()
             # self.clock.tick(self.fps)
 
