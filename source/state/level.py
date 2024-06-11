@@ -9,7 +9,7 @@ from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
-LOOP_NUM = 1010
+LOOP_NUM = 1000
 TESTLOOP = 10
 
 """ #add:state定义
@@ -1972,9 +1972,10 @@ class Level(tool.State):
                 else:
                     #add:到达预定次数停止
                     if self.level_num == LOOP_NUM:
+                        self.done = True
                         self.total_car /= 10
                         print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
-                        self.next = c.GAME_VICTORY
+                        self.next = c.EXIT
                     else:
                         self.next = c.LEVEL
                     # 播放胜利音效
@@ -1991,9 +1992,10 @@ class Level(tool.State):
             #c.SOUND_SCREAM.play()
             #add:到达预定次数停止
             if self.level_num == LOOP_NUM:
+                self.done = True
                 self.total_car /= 10
                 print("win: ", self.win_num, " lose: ", self.lose_num, " avg car: ", self.total_car)
-                self.next = c.GAME_LOSE
+                self.next = c.EXIT
             else:
                 self.next = c.LEVEL
                 self.done = True
