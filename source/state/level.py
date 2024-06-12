@@ -865,7 +865,7 @@ class Level(tool.State):
         self.menubar.update(self.current_time)
         
         #add:agent决策
-        self.agent_make_decision()
+        #self.agent_make_decision()
         # 检查碰撞
         self.checkBulletCollisions()
         self.checkZombieCollisions()
@@ -883,6 +883,7 @@ class Level(tool.State):
         # self.collision_count= max(self.collision_count,self.calculatePlantCollisions())
         # do decision here
         #self.autoPlantWallnutOntoTheLeftMostZombie()
+        self.autoPlantWallnutSmarter()
     
     def getNearestZombieGridsForEachRow(self)-> list[int,int,int,int,int]:
         zombie_list=[]
@@ -1303,7 +1304,87 @@ class Level(tool.State):
             #add:两个都会选
             if not self.addPlantByMe(1,min_y,0):
                 self.addPlantByMe(1,min_y,1)
-    
+    #! USER
+    def autoPlantWallnutSmarter(self):
+        self.predict_cnt+=1
+        if(self.predict_cnt<400):
+            return
+        zombies_list = self.getZombiesPositions()
+
+        # do not attack to near zombies
+        min_x_entry = self.getNearestZombieGridsForEachRow()
+        filter_ed_zombies_list = [x for x in min_x_entry if x!=-1]
+        if len(filter_ed_zombies_list)==0 or min(filter_ed_zombies_list)>4:
+            return
+        
+        #尝试放置爆炸坚果
+        estimate_placement =-1
+        if len(zombies_list)>0:
+            #找出每一行中最左侧的僵尸
+            min_x_entry = self.getNearestZombieGridsForEachRow()
+            #print(min_x_entry)
+            # 对于每一个位置，遍历一遍周围的僵尸
+            result_list=[]
+            
+            for h in range(len(min_x_entry)):
+                y_range =1
+                x_range = c.GRID_X_SIZE*1.5
+                map_y=h
+                x,_ = self.map.getMapGridPos(min_x_entry[h],100)
+                cnt=0
+                if (x==-1):
+                    continue
+                for i in range(self.map_y_len):
+                    if abs(i - map_y) > y_range:
+                        continue
+                    for zombie in self.zombie_groups[i]:
+                        if ((abs(zombie.rect.centerx - x) <= x_range) or
+                                ((zombie.rect.right - (x-x_range) > 20) or
+                                  (zombie.rect.right - (x-x_range))/zombie.rect.width > 0.2,
+                                    ((x+x_range) - zombie.rect.left > 20) or 
+                                    ((x+x_range) - zombie.rect.left)/zombie.rect.width > 0.2)[zombie.rect.x > x]): 
+                             # 这代码不太好懂，后面是一个判断僵尸在左还是在右，前面是一个元组，[0]是在左边的情况，[1]是在右边的情况
+                            cnt+=1
+                result_list.append(cnt)
+            if(result_list!=[]):
+                estimate_placement = result_list.index(max(result_list))
+            #取最大下标放球，如果本路有坚果就不放
+                for plant in self.plant_groups[estimate_placement]:
+                    if plant.name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                        # 不放置 
+                        estimate_placement=-1
+                        break
+            # 省红球 如果<3击杀，就不放红球
+            if(max(result_list) <3 and len(zombies_list) >3 ):
+                estimate_placement=-1
+        if(estimate_placement!=-1):
+            if(self.addPlantByMe(0,estimate_placement,1)):
+                # 成功放置爆炸坚果
+                return
+        # 尝试放置普通坚果
+        estimate_placement=-1
+        if len(zombies_list)>0:
+            #找出每一行中最左侧的僵尸
+            min_x_entry = min(zombies_list, key=lambda x: x[3])
+
+            # 返回其位置y
+            min_y = min_x_entry[4]
+            estimate_placement = min_y
+            
+            #print("try add wallnut on y=", min_y)
+            # 检查是否有坚果
+            for plant in self.plant_groups[estimate_placement]:
+                if plant.name in [c.WALLNUTBOWLING, c.REDWALLNUTBOWLING]:
+                    # 不放置 
+                    estimate_placement=-1
+                    break
+        if(estimate_placement!=-1):
+            if(self.addPlantByMe(0,estimate_placement,0)):
+                # 成功放置普通坚果
+                return
+
+
+
     #add:agent延时决策
     def agent_make_decision(self):
         self.predict_cnt+=1
