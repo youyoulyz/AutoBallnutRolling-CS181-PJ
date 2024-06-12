@@ -9,8 +9,8 @@ from .BowlingAgent import bowling_agent
 from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
-LOOP_NUM = 1000
-TESTLOOP = 10
+LOOP_NUM = 3000
+TESTLOOP = 50
 
 """ #add:state定义
 class level_info():
@@ -180,7 +180,7 @@ class Level(tool.State):
 
             # 传送带模式应当增大僵尸容量
             if (self.bar_type != c.CHOOSEBAR_STATIC):
-                zombie_volume += 5
+                zombie_volume += -1
 
             if inevitable_zombie_dict and (wave in inevitable_zombie_dict):
                 for new_zombie in inevitable_zombie_dict[wave]:

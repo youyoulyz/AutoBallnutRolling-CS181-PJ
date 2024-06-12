@@ -150,11 +150,11 @@ class Control():
 
     def run(self):
         while not self.done:
-            # self.event_loop()
+            self.event_loop()
             self.update()
             # pg.display.update()
             #这行拿来目力验证？？？？？？？
-            if self.state == c.LEVEL and  self.state.level_num > 1000:
+            if self.state.level_num > 2940:
                 pg.display.update()
             # self.clock.tick(self.fps)
 
