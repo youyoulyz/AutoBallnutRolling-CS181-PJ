@@ -1,0 +1,213 @@
+[33mcommit c50351a09c64edc9bc4aadf6584723961f90045e[m[33m ([m[1;36mHEAD -> [m[1;32mfast[m[33m, [m[1;31morigin/fast[m[33m)[m
+Author: chenym1@shanghaitech.edu.cn <chenym1@shanghaitech.edu.cn>
+Date:   Wed Jun 12 13:48:30 2024 +0800
+
+    fast train
+
+[33mcommit 99c16eebac1a0a889dd8ba7b82c5d7ffaf16c63e[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 21:41:34 2024 +0800
+
+    简化
+
+[33mcommit d9ca2213db144b9db119fcb5172dbd706db9d92a[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 12:33:36 2024 +0800
+
+    fix: 游戏结束陷入死循环打印的bug
+
+[33mcommit c8f9596bfc8e18a2e2b7fc5cc00052468599cbcd[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 11:52:48 2024 +0800
+
+    统一修改顶部常数调整局数
+
+[33mcommit 90bb8f172bbdb174754dbe9ce1910647727ca33c[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 11:50:55 2024 +0800
+
+    统一用最上面的常量改局数
+
+[33mcommit a5e42f22a44673d719050405c15ce16ffed27147[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 11:44:24 2024 +0800
+
+    add:加入testloop常量，可以直接在外层修改
+
+[33mcommit 4473c0485988573064df83dd1d05c7f43d9134fc[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 10:58:36 2024 +0800
+
+    fix: 总体观测变量要在最开始时初始化，否则一直被置零
+
+[33mcommit b4e1765389bd76546d42d4f4cb79bd38259f2aae[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Tue Jun 11 10:57:12 2024 +0800
+
+    fix: 展示画布时判断是不是Level状态；探索率按照不同局数递减；1000局，最后10局test；状态空间改成看有没有这张卡，而非卡的数量；画布不稳定，超过100次后就无法正常展示
+
+[33mcommit 16a1828e6796775327cb913b27da4b806db8150f[m
+Author: chenym1@shanghaitech.edu.cn <chenym1@shanghaitech.edu.cn>
+Date:   Tue Jun 11 00:24:24 2024 +0800
+
+    run faaaaaaaaaast
+
+[33mcommit dbf951d2bd7d63787b256e6c92896a445d33dae8[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Mon Jun 10 16:50:10 2024 +0800
+
+    重新加入none
+
+[33mcommit fb64ee954760d234d01e8278e220a68cdb115248[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Sun Jun 9 23:56:39 2024 +0800
+
+    很喜欢往第一行丢
+
+[33mcommit 3961565016c5b7e85cd27e794135eed2a9222cd3[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 22:01:49 2024 +0800
+
+    调整了获取state的决策的区域，从update函数移到play函数；状态目前的表示为（普通坚果，爆炸见过，第一行僵尸存在的格子的tuple（有1无0），第二行存在的格子，。。。，第五行存在的格子）；reward函数仍需重新定义，目前会倾向不做行为
+
+[33mcommit 73fd2aa82648c157f496cbcff4da1d99186f86f9[m
+Merge: fb192fb 3ee6385
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 22:00:38 2024 +0800
+
+    调整了获取state的决策的区域，从update函数移到play函数；状态目前的表示为（普通坚果，爆炸见过，第一行僵尸存在的格子的tuple（有1无0），第二行存在的格子，。。。，第五行存在的格子）；reward函数仍需重新定义，目前会倾向不做行为
+
+[33mcommit fb192fbaceaca7602b75e7880aec1d7ea89b5499[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 21:59:57 2024 +0800
+
+    调整了获取state的决策的区域，从update函数移到play函数；状态目前的表示为（普通坚果，爆炸见过，第一行僵尸存在的格子的tuple（有1无0），第二行存在的格子，。。。，第五行存在的格子）；reward函数仍需重新定义，目前会倾向不做行为
+
+[33mcommit 3ee63856e1bb47fac466a640b037cea4e69877c3[m
+Merge: a04ea03 2d18d64
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 21:44:34 2024 +0800
+
+    Merge branch 'master' of https://github.com/youyoulyz/CS181-PJ
+
+[33mcommit a04ea03ff13290a1c8f72ed8a4b61491a6097ec6[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 21:24:36 2024 +0800
+
+    调整了获取state的决策的区域，从update函数移到play函数；状态目前的表示为（普通坚果，爆炸见过，第一行僵尸存在的格子的tuple（有1无0），第二行存在的格子，。。。，第五行存在的格子）；reward函数仍需重新定义，目前会倾向不做行为
+
+[33mcommit 2d18d64e62a3df8e017ae07b29d5e3bfc53a6032[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Fri Jun 7 16:38:34 2024 +0800
+
+    feat: UI: update UI ctrler for >100rounds display a full UI
+
+[33mcommit d0de8dfa0cafb9b55f84e5f0a18a8129d2b4ae4e[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 12:45:21 2024 +0800
+
+    fix:修改prediction，按格子计算；状态空间可能需要引入所有格子上僵尸的数量（假血量）；需要去gui训练
+
+[33mcommit 795fd1f005b06d6f2e10bae7a89d6b52b9814439[m
+Merge: d1b9b29 ee12342
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 11:17:30 2024 +0800
+
+    Merge branch 'master' of https://github.com/youyoulyz/CS181-PJ
+
+[33mcommit ee12342303e098cd01fe6c98ba56f13cd041280e[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Fri Jun 7 11:11:27 2024 +0800
+
+    fix: prediction location error
+
+[33mcommit d1b9b29044de5b658a6cf2318cb1478642130772[m
+Merge: 07e8d3a 3931f9f
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 11:05:55 2024 +0800
+
+    Merge branch 'master' of https://github.com/youyoulyz/CS181-PJ
+
+[33mcommit 07e8d3ad6e624cb2d09c9fed1a885e32e6bc97ba[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 11:05:49 2024 +0800
+
+    temp
+
+[33mcommit 3931f9f60e20270676f40be4bb8a37fb48e4295b[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Fri Jun 7 10:54:55 2024 +0800
+
+    feat: add get nearest zombie
+
+[33mcommit d2c202e6b4835152331b386a7983cbf3bac71621[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Fri Jun 7 02:36:50 2024 +0800
+
+    fix:简化整个状态空间，开始学习，但效果很差，当前状态空间应该不会收敛
+
+[33mcommit f3518302fd05897d693a62460482babf256beb63[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Thu Jun 6 22:07:08 2024 +0800
+
+    add:局数计数
+
+[33mcommit a4637f375b088bcd8ec9dd4c97cf19d0fc19153b[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Thu Jun 6 20:19:20 2024 +0800
+
+    tryFix: try fix out range problem in plant.py
+
+[33mcommit 1de159e303992e141707d571c77e53c9131cea0e[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Thu Jun 6 19:49:53 2024 +0800
+
+    进展：agent运行成功，但本体在坚果滚动转行时出现bug，使得plant_group数组越界
+
+[33mcommit 083c61433a9fcc8ec63a0a5d853bf9f3a71c7a49[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Thu Jun 6 10:01:24 2024 +0800
+
+    add:新建了一些agent调用的函数，拉取agent所需的信息
+
+[33mcommit 36322381fc484f8420db1bf06985bf7c4bca4dee[m
+Merge: adeefdd 22fb607
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Wed Jun 5 01:09:40 2024 +0800
+
+    Merge branch 'master' of https://github.com/youyoulyz/CS181-PJ
+
+[33mcommit adeefdd176b68cfba514945aed55c9a3e827e782[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Wed Jun 5 01:09:14 2024 +0800
+
+    add: 参照hw5写bowling agent 类
+
+[33mcommit 73faaf8ba7eaf4d9079cf48708c5dacc6b0e0a25[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Wed Jun 5 01:08:31 2024 +0800
+
+    modify: 加入bowlingagent，未使用
+
+[33mcommit 6e37283fc7d3009c28aef088f1947ede9cf56d1f[m
+Author: SHRichthofen <2316703250@qq.com>
+Date:   Wed Jun 5 01:04:40 2024 +0800
+
+    add: bowlingagent类，模仿hw5，引用其中counter，update方法暂未想好
+
+[33mcommit 22fb6078d592418b94bd9fd6d7c1600e9a24da0e[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Tue Jun 4 20:53:26 2024 +0800
+
+    fix: 僵尸量调到5，掉头僵尸直接死
+
+[33mcommit 57eb4121f6b3516534dbc10f704a2015f762d9a5[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   Tue Jun 4 19:58:02 2024 +0800
+
+    feat: upgrade to 纯贪心; 加入撞击技术
+    TODO： 加入关卡重置
+
+[33mcommit a3cd2639248059cbc8b4c64d40870d4b58de72c2[m
+Author: youyoulyz <2319089895@qq.com>
+Date:   

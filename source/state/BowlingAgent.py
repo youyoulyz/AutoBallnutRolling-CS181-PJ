@@ -12,7 +12,7 @@ import numpy
 class bowling_agent():
     def __init__(self):
         self.qvalue = Counter()
-        self.eps = 0.15 #探索率
+        self.eps = 0.11 #探索率
         self.gamma = 0.8 #衰减率
         self.alpha = 0.4 #学习率
         self.qvalue = Counter()
@@ -50,8 +50,8 @@ class bowling_agent():
                 action = random.choice(actions)
             else:
                 action = self.compute_action_from_q(state)
-                if action != None:
-                    print(action) 
+                # if action != None:
+                #     print(action) 
         return action
         
         
@@ -119,6 +119,13 @@ class Counter(dict):
     subtracted or multiplied together.  See below for details.  They can
     also be normalized and their total count and arg max can be extracted.
     """
+    def save_data(self, filename):
+        numpy.save(filename,  dict(self))
+
+    def load_data(self, filename):
+        loaded_data = numpy.load(filename, allow_pickle=True).item()
+        self.clear()  # 清空当前Counter对象
+        self.update(loaded_data)  # 更新Counter对象的内容
 
     def __getitem__(self, idx):
         self.setdefault(idx, 0)

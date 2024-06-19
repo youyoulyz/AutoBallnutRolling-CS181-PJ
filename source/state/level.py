@@ -10,7 +10,7 @@ from .BowlingAgent import Counter
 import copy
 logger = logging.getLogger("main")
 LOOP_NUM = 3000
-TESTLOOP = 50
+TESTLOOP = 30
 
 """ #add:state定义
 class level_info():
@@ -37,6 +37,7 @@ class Level(tool.State):
         self.win_num = 0
         self.lose_num = 0
         self.total_car = 0
+        self.bowlingAgent.qvalue.load_data('testsave_16400.npy')
 
     def startup(self, current_time, persist):
         self.game_info = persist
@@ -46,10 +47,18 @@ class Level(tool.State):
         #self.level_info = level_info()
         self.qlearning_action = None
         self.prediction_result = 0
-        
+        print(len(self.bowlingAgent.qvalue))
         #add:局数计数器
+        # print(self.bowlingAgent.qvalue)
         self.level_num += 1
-        
+        if self.level_num  %1000 == 0:
+            print("Warning!!!! Save Q-table\n")
+            self.bowlingAgent.qvalue.save_data('testsave_' + str(self.level_num + 16400) + '.npy')
+            # print("Warning!!!! Load Q-table\n")
+            # self.bowlingAgent.qvalue.load_data('testsave.npy')
+            # print(self.bowlingAgent.qvalue)
+
+
         print("the ", self.level_num, " th round start")
         
         #add:实时调整探索率
@@ -179,8 +188,8 @@ class Level(tool.State):
                 zombie_volume -= c.CREATE_ZOMBIE_DICT[c.FLAG_ZOMBIE][0]
 
             # 传送带模式应当增大僵尸容量
-            if (self.bar_type != c.CHOOSEBAR_STATIC):
-                zombie_volume += -1
+            # if (self.bar_type != c.CHOOSEBAR_STATIC):
+            #     zombie_volume += 2
 
             if inevitable_zombie_dict and (wave in inevitable_zombie_dict):
                 for new_zombie in inevitable_zombie_dict[wave]:
@@ -774,7 +783,7 @@ class Level(tool.State):
         #add:获取上一状态的car数量
         old_car = len(self.cars)
         #agent决策，并返回是否决策
-        decided = self.agent_make_decision(current_state)
+        decided = None; #self.agent_make_decision(current_state)
         
         # 如果暂停
         if self.show_game_menu:
